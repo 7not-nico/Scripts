@@ -333,7 +333,7 @@ install_packages() {
     print_status "Installing packages from $repo..."
     
     # CachyOS packages - use --needed to skip already installed packages
-    paru -S --needed --noconfirm --repo "$repo" \
+    paru -S --needed --noconfirm \
       cachyos-kernel-manager cachyos-hello cachyos-fish-config fish lapce zed octopi
     
     # AUR packages - use --needed to skip already installed packages
