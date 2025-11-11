@@ -274,11 +274,11 @@ install_packages() {
     fi
     
     # CachyOS packages (add dropbox)
-    paru -S --needed --ask=4 \
+    paru -S --needed --ask=1 \
       cachyos-kernel-manager cachyos-hello cachyos-fish-config fish lapce zed octopi dropbox || true
     
-    # AUR packages (add zed-browser-bin, shortwave)
-    paru -S --needed --noconfirm opencode-bin zed-browser-bin shortwave || true
+    # AUR packages (add zen-browser-bin, shortwave)
+    paru -S --needed --noconfirm opencode-bin zen-browser-bin shortwave || true
 }
 ```
 
@@ -286,7 +286,7 @@ install_packages() {
 - **Yay Installation**: Automatic fallback if yay not available
 - **Update Detection**: `yay -Qu` for quiet update checking
 - **Restart Workflow**: Exit after update, require restart, continue on second run
-- **New Packages**: dropbox (official repos), zed-browser-bin, shortwave (AUR)
+- **New Packages**: dropbox (official repos), zen-browser-bin, shortwave (AUR)
 - **Error Handling**: Continues regardless of individual failures
 
 ### Integration Point

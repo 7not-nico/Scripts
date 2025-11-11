@@ -30,7 +30,7 @@ Scripts/
 3. **Package Installation**: Automatic conflict resolution with `--needed` and `--ask=4`
 4. **Hardware Optimization**: Intel graphics detection with error handling
 5. **Orphan Removal**: Clean system maintenance (Step 6)
-6. **Enhanced Package Support**: New packages (dropbox, zed-browser-bin, shortwave)
+6. **Enhanced Package Support**: New packages (dropbox, zen-browser-bin, shortwave)
 7. **cachyos-hello Launch**: Conditional launch with user consent
 
 ### Technical Fixes Applied
@@ -42,7 +42,7 @@ Scripts/
 - ✅ Orphan package cleanup
 - ✅ System update detection with restart workflow
 - ✅ Yay installation fallback mechanism
-- ✅ New package integration (dropbox, zed-browser-bin, shortwave)
+- ✅ New package integration (dropbox, zen-browser-bin, shortwave)
 
 ### Installation Flow
 ```bash

@@ -140,7 +140,7 @@ The installation script has been debugged and fixed for the following problems:
 - Added `--needed` flag to skip already installed packages
 - Implemented `--ask=4` for automatic conflict resolution
 - Added error handling with `|| true` to continue on failures
-- Added new packages: `dropbox` (official repos), `zed-browser-bin`, `shortwave` (AUR)
+- Added new packages: `dropbox` (official repos), `zen-browser-bin`, `shortwave` (AUR)
 
 **Hardware Optimization:**
 - Fixed `sudo chwd -a` command syntax (removed trailing `/`)
@@ -237,7 +237,7 @@ The installation script has been debugged and fixed for the following problems:
 
 ### Step 5: Package Installation
 - **Action**: Install CachyOS packages and additional tools
-- **New packages**: dropbox, zed-browser-bin, shortwave
+- **New packages**: dropbox, zen-browser-bin, shortwave
 - **Conflict handling**: Automatic resolution with fallbacks
 
 ### Step 6: Orphan Removal

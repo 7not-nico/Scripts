@@ -70,15 +70,15 @@ echo "Result: '$result'"
 **Symptoms:**
 - `error: target not found: cachyos-v3`
 - Package not found errors
-- `dropbox`, `zed-browser-bin`, or `shortwave` installation failures
+- `dropbox`, `zen-browser-bin`, or `shortwave` installation failures
 
 **Solution:**
 ```bash
 # Remove --repo flag, let paru find packages
 paru -S --needed --noconfirm package_name
 
-# For AUR packages like zed-browser-bin and shortwave:
-paru -S --needed --noconfirm zed-browser-bin shortwave || true
+# For AUR packages like zen-browser-bin and shortwave:
+paru -S --needed --noconfirm zen-browser-bin shortwave || true
 
 # For official packages like dropbox:
 paru -S --needed --ask=4 dropbox || true
