@@ -42,6 +42,10 @@ install_packages() {
     for package in paru-bin yazi lapce zed octopi; do
         install_package "$package"
     done
+    
+    # Install AUR packages with paru (no sudo needed)
+    print_status "Installing AUR packages with paru..."
+    paru -S --needed --noconfirm yazi lapce zed octopi
 }
 
 # Main function
