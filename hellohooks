@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # CachyOS Hello Hooks Script
+# Manages cachyos-hello internal hooks
 # Usage: ./hellohooks
 
 set -e
