@@ -14,13 +14,26 @@ print_status() {
     echo -e "${GREEN}[INFO]${NC} $1"
 }
 
+check_updates_complete() {
+    ! pacman -Qu | grep -q .
+}
+
 # Main installation
 main() {
     print_status "Starting CachyOS installation..."
     
-    # Update system
+    # Update system first
     print_status "Updating system..."
     sudo pacman -Syu --noconfirm
+    
+    # Check if updates are still pending and restart if needed
+    if ! check_updates_complete; then
+        print_status "Updates still pending. Rebooting to complete updates..."
+        sudo reboot
+        exit 0
+    fi
+    
+    print_status "System is up to date. Continuing installation..."
     
     # Install paru for AUR
     if ! command -v paru &> /dev/null; then
@@ -71,7 +84,7 @@ main() {
     print_status "Cleaning up..."
     paru -c --noconfirm
     
-    print_status "Installation complete! Please reboot your system."
+    print_status "Installation complete!"
 }
 
 main "$@"
