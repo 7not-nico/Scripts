@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# CachyOS Hello Hooks Script
+# Usage: ./hellohooks
+
+set -e
+
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+print_status() {
+    echo -e "${GREEN}[INFO]${NC} $1"
+}
+
+main() {
+    print_status "Installing CachyOS hello hooks..."
+    
+    # Install cachyos-hooks package
+    if command -v paru &> /dev/null; then
+        paru -S --needed --noconfirm cachyos-hooks
+    else
+        sudo pacman -S --needed --noconfirm cachyos-hooks
+    fi
+    
+    print_status "CachyOS hello hooks installation complete!"
+}
+
+main "$@"
