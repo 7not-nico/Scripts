@@ -204,13 +204,13 @@ remove_existing_repos() {
 
 # Function to check CPU support for optimal repository selection
 detect_optimal_repo() {
-    print_status "Checking CPU support for optimal repository selection..."
+    print_status "Checking CPU support for optimal repository selection..." >&2
     
     if /lib/ld-linux-x86-64.so.2 --help | grep -q "x86-64-v4 (supported, searched)"; then
-        print_status "✅ CPU supports x86-64-v4 instruction set"
+        print_status "✅ CPU supports x86-64-v4 instruction set" >&2
         echo "cachyos-v4"
     else
-        print_status "❌ CPU does not support x86-64-v4, using v3"
+        print_status "❌ CPU does not support x86-64-v4, using v3" >&2
         echo "cachyos-v3"
     fi
 }
