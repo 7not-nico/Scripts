@@ -37,8 +37,8 @@ main() {
         print_status "Mirror rating complete!"
     fi
     
-    print_status "Installing fish shell and octopi with paru..."
-    paru -S --needed --noconfirm fish octopi
+    print_status "Installing fish shell, octopi and zen-browser-bin with paru..."
+    paru -S --needed --noconfirm fish octopi zen-browser-bin
 }
 
 main "$@"
