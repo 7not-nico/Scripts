@@ -33,10 +33,10 @@ if ! command -v cachyos-rate-mirrors &> /dev/null; then
     echo "Installing cachyos-rate-mirrors..."
     paru -S --noconfirm cachyos-rate-mirrors
     echo "Running mirror ranking..."
-    cachyos-rate-mirrors --force
+    sudo cachyos-rate-mirrors --force
 else
     echo "cachyos-rate-mirrors already installed. Running mirror ranking..."
-    cachyos-rate-mirrors --force
+    sudo cachyos-rate-mirrors --force
 fi
 
 # Optimize system for hardware
