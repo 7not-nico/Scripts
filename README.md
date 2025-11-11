@@ -7,7 +7,7 @@ Fast setup scripts for CachyOS Linux.
 ### `install_cachyos.sh`
 Full system installation with update-then-restart workflow.
 
-### `install_rate_mirrors.sh`
+### `rate-mirrors.sh`
 Mirror optimization + package installation with repo priority.
 
 ## Quick Start
@@ -17,7 +17,7 @@ Mirror optimization + package installation with repo priority.
 ./install_cachyos.sh
 
 # Mirror setup only
-./install_rate_mirrors.sh
+./rate-mirrors.sh
 ```
 
 ## Features

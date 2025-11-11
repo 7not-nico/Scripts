@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # CachyOS Rate Mirrors Script
-# Usage: ./install_rate_mirrors.sh
+# Usage: ./rate-mirrors.sh
 
 set -e
 
