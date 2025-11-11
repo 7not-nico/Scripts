@@ -5,21 +5,35 @@
 
 set -e
 
-# Download and setup CachyOS repository
-curl -O https://mirror.cachyos.org/cachyos-repo.tar.xz
-tar xvf cachyos-repo.tar.xz && cd cachyos-repo
-echo "y" | sudo ./cachyos-repo.sh
-cd -
+# Check if CachyOS repos are already configured
+if ! grep -q "cachyos\|cachyos-v3\|cachyos-v4" /etc/pacman.conf; then
+    echo "CachyOS repos not found. Setting up repository..."
+    # Download and setup CachyOS repository
+    curl -O https://mirror.cachyos.org/cachyos-repo.tar.xz
+    tar xvf cachyos-repo.tar.xz && cd cachyos-repo
+    sudo ./cachyos-repo.sh --install
+    cd -
+else
+    echo "CachyOS repos already configured."
+fi
 
-# Install paru AUR helper
-echo "Installing paru..."
-echo "y" | yay -S --noconfirm paru
+# Check if cachyos-rate-mirrors is installed
+if ! command -v cachyos-rate-mirrors &> /dev/null; then
+    echo "cachyos-rate-mirrors not found. Installing paru and cachyos-rate-mirrors..."
 
-# Install and run mirror ranking tool
-echo "Installing cachyos-rate-mirrors..."
-echo "y" | paru -S --noconfirm cachyos-rate-mirrors
-echo "Running mirror ranking..."
-echo "y" | cachyos-rate-mirrors
+    # Install paru AUR helper
+    echo "Installing paru..."
+    yay -S --noconfirm paru
+
+    # Install and run mirror ranking tool
+    echo "Installing cachyos-rate-mirrors..."
+    paru -S --noconfirm cachyos-rate-mirrors
+    echo "Running mirror ranking..."
+    cachyos-rate-mirrors --force
+else
+    echo "cachyos-rate-mirrors already installed. Running mirror ranking..."
+    cachyos-rate-mirrors --force
+fi
 
 # Optimize system for hardware
 echo "Optimizing system..."
@@ -27,7 +41,7 @@ sudo chwd -a /
 
 # Install all packages from CachyOS v3 repo
 echo "Installing packages..."
-echo "y" | paru -S --noconfirm --repo cachyos-v3 \
+paru -S --noconfirm --repo cachyos-v3 \
   cachyos-kernel-manager cachyos-hello \
   opencode-bin fish cachyos-fish-config \
   lapce zed
