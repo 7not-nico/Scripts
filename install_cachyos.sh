@@ -268,6 +268,8 @@ manage_repositories() {
     fi
     
     echo "$preferred_repo"
+    
+    echo "$preferred_repo"
 }
 
 # Function to install paru if not present
