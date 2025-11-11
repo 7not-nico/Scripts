@@ -37,8 +37,11 @@ main() {
         print_status "Mirror rating complete!"
     fi
     
-    print_status "Installing fish shell, octopi and zen-browser-bin with paru..."
-    paru -S --needed --noconfirm fish octopi zen-browser-bin
+    print_status "Installing fish, octopi, dropbox, brave-bin, zen-browser-bin, opencode-bin, gemini-cli, lapce, zed and cachyos-hello with paru..."
+    paru -S --needed --noconfirm fish octopi dropbox brave-bin zen-browser-bin opencode-bin gemini-cli lapce zed cachyos-hello
+    
+    print_status "Launching cachyos-hello..."
+    cachyos-hello
 }
 
 main "$@"

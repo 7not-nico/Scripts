@@ -35,14 +35,21 @@ main() {
     
     print_status "System is up to date. Continuing installation..."
     
-    # Install paru for AUR
+    # Install paru-bin for AUR
     if ! command -v paru &> /dev/null; then
-        print_status "Installing paru..."
-        sudo pacman -S --needed --noconfirm base-devel git
-        git clone https://aur.archlinux.org/paru.git /tmp/paru
-        cd /tmp/paru
-        makepkg -si --noconfirm
-        cd - && rm -rf /tmp/paru
+        print_status "Installing paru-bin..."
+        # Try to install from repos first
+        if sudo pacman -S --needed --noconfirm paru-bin 2>/dev/null; then
+            print_status "paru-bin installed from repos"
+        else
+            # Fallback: install from AUR using makepkg
+            print_status "Installing paru-bin from AUR..."
+            sudo pacman -S --needed --noconfirm base-devel git
+            git clone https://aur.archlinux.org/paru-bin.git /tmp/paru-bin
+            cd /tmp/paru-bin
+            makepkg -si --noconfirm
+            cd - && rm -rf /tmp/paru-bin
+        fi
     fi
     
     # Install CachyOS repos
@@ -62,7 +69,7 @@ main() {
         cachyos-hooks \
         cachyos-mirrorlist \
         cachyos-keyring \
-        paru \
+        paru-bin \
         chwd \
         htop \
         neofetch \
@@ -74,7 +81,8 @@ main() {
     print_status "Installing AUR packages..."
     paru -S --needed --noconfirm \
         zen-browser-bin \
-        shortwave
+        shortwave \
+        dropbox
     
     # Setup hardware
     print_status "Detecting hardware..."
