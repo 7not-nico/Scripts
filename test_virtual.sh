@@ -237,6 +237,18 @@ Server = https://mirror.cachyos.org/$repo/$arch
 Server = https://mirror.cachyos.org/$repo/v3/$arch
 EOF
 
+# Scenario 5: Only conflicting v4 repo (CPU doesn't support v4)
+cat > test_v4_only.conf << 'EOF'
+[options]
+Architecture = auto
+
+[core]
+Server = https://mirror.archlinux.org/$repo/os/$arch
+
+[cachyos-v4]
+Server = https://mirror.cachyos.org/$repo/v4/$arch
+EOF
+
 # Detect optimal repo once
 print_status "Checking CPU support for optimal repository selection..."
 preferred_repo=$(detect_optimal_repo)
@@ -251,6 +263,7 @@ run_test "No CachyOS Repositories" "test_no_repos.conf" "$preferred_repo"
 run_test "Optimal Repository Already Present" "test_optimal_v3.conf" "$preferred_repo"
 run_test "Conflicting Repositories (v3 vs v4)" "test_conflicting.conf" "$preferred_repo"
 run_test "Compatible Repositories (base + v3)" "test_compatible.conf" "$preferred_repo"
+run_test "Suboptimal Repository Only (v4 when CPU supports v3)" "test_v4_only.conf" "$preferred_repo"
 
 # Clean up test files
 rm -f test_*.conf
