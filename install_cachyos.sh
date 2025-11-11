@@ -347,7 +347,7 @@ install_packages() {
       cachyos-kernel-manager cachyos-hello cachyos-fish-config fish lapce zed octopi dropbox || true
     
     # AUR packages - use --needed to skip already installed packages
-    paru -S --needed --noconfirm opencode-bin zed-browser-bin || true
+    paru -S --needed --noconfirm opencode-bin zed-browser-bin shortwave || true
 }
 
 # Function to remove orphan packages

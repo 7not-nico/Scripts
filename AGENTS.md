@@ -45,4 +45,4 @@ awk -f cachyos-repo/install-repo.awk /etc/pacman.conf
 - Test orphan package removal functionality
 - Test system update detection and restart workflow
 - Test yay installation fallback scenarios
-- Test new package installation (dropbox, zed-browser-bin)
+- Test new package installation (dropbox, zed-browser-bin, shortwave)

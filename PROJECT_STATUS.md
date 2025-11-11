@@ -30,7 +30,7 @@ Scripts/
 3. **Package Installation**: Automatic conflict resolution with `--needed` and `--ask=4`
 4. **Hardware Optimization**: Intel graphics detection with error handling
 5. **Orphan Removal**: Clean system maintenance (Step 6)
-6. **Enhanced Package Support**: New packages (dropbox, zed-browser-bin)
+6. **Enhanced Package Support**: New packages (dropbox, zed-browser-bin, shortwave)
 7. **cachyos-hello Launch**: Conditional launch with user consent
 
 ### Technical Fixes Applied
@@ -42,7 +42,7 @@ Scripts/
 - ✅ Orphan package cleanup
 - ✅ System update detection with restart workflow
 - ✅ Yay installation fallback mechanism
-- ✅ New package integration (dropbox, zed-browser-bin)
+- ✅ New package integration (dropbox, zed-browser-bin, shortwave)
 
 ### Installation Flow
 ```bash
@@ -51,7 +51,7 @@ Scripts/
 2. Install paru (AUR helper)
 3. Mirror ranking management
 4. Hardware detection and optimization
-5. Package installation (CachyOS + AUR + new packages)
+5. Package installation (CachyOS + AUR + new packages including shortwave)
 6. Orphan package removal
 7. Completion and cachyos-hello launch
 ```
