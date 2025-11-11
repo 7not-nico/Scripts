@@ -21,9 +21,13 @@ fi
 if ! command -v cachyos-rate-mirrors &> /dev/null; then
     echo "cachyos-rate-mirrors not found. Installing paru and cachyos-rate-mirrors..."
 
-    # Install paru AUR helper
-    echo "Installing paru..."
-    yay -S --noconfirm paru
+    # Check if paru is already installed (either paru or paru-bin)
+    if ! command -v paru &> /dev/null; then
+        echo "Installing paru..."
+        yay -S --noconfirm paru
+    else
+        echo "paru already installed."
+    fi
 
     # Install and run mirror ranking tool
     echo "Installing cachyos-rate-mirrors..."
