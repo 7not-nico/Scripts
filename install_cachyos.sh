@@ -5,18 +5,46 @@
 
 set -e
 
+# Check CPU support for optimal repository selection
+echo "Checking CPU support..."
+if /lib/ld-linux-x86-64.so.2 --help | grep -q "x86-64-v4 (supported, searched)"; then
+    echo "✅ CPU supports x86-64-v4 instruction set"
+    preferred_repo="cachyos-v4"
+else
+    echo "❌ CPU does not support x86-64-v4, using v3"
+    preferred_repo="cachyos-v3"
+fi
+
 # Check if CachyOS repos are already configured
-if ! grep -q "cachyos\|cachyos-v3\|cachyos-v4\|cachyos-znver4" /etc/pacman.conf; then
-    echo "CachyOS repos not found. Setting up repository..."
+if grep -q "$preferred_repo" /etc/pacman.conf; then
+    echo "CachyOS $preferred_repo repos already configured."
+elif grep -q "cachyos\|cachyos-v3\|cachyos-v4\|cachyos-znver4" /etc/pacman.conf; then
+    echo "Other CachyOS repos found. Switching to optimal $preferred_repo..."
     # Download and extract the installer
     curl -O https://mirror.cachyos.org/cachyos-repo.tar.xz
     tar xvf cachyos-repo.tar.xz && cd cachyos-repo
     
-    # Run the automated installer
-    sudo ./cachyos-repo.sh
+    # Remove existing repos and install optimal one
+    sudo ./remove-repo.awk
+    if [[ "$preferred_repo" == "cachyos-v4" ]]; then
+        sudo ./install-v4-repo.awk
+    else
+        sudo ./install-repo.awk
+    fi
     cd -
 else
-    echo "CachyOS repos already configured."
+    echo "CachyOS repos not found. Setting up optimal $preferred_repo repository..."
+    # Download and extract the installer
+    curl -O https://mirror.cachyos.org/cachyos-repo.tar.xz
+    tar xvf cachyos-repo.tar.xz && cd cachyos-repo
+    
+    # Install the optimal repository
+    if [[ "$preferred_repo" == "cachyos-v4" ]]; then
+        sudo ./install-v4-repo.awk
+    else
+        sudo ./install-repo.awk
+    fi
+    cd -
 fi
 
 # Check if cachyos-rate-mirrors is installed
@@ -68,16 +96,15 @@ fi
 
 # Install and run hardware detection tool
 echo "Installing chwd for hardware optimization..."
-paru -S --noconfirm --repo cachyos chwd
+paru -S --noconfirm --repo "$preferred_repo" chwd
 echo "Optimizing system..."
 sudo chwd -a /
 
-# Install all packages from appropriate repositories
-echo "Installing packages..."
+# Install all packages from optimal repository
+echo "Installing packages from $preferred_repo..."
 
-# Let pacman figure out which repository to use for CachyOS packages
-# This will automatically use the correct repo (v3, v4, or znver4) based on what's configured
-paru -S --noconfirm \
+# Use the preferred repository for CachyOS packages
+paru -S --noconfirm --repo "$preferred_repo" \
   cachyos-kernel-manager cachyos-hello cachyos-fish-config fish lapce zed
 
 # Install from AUR

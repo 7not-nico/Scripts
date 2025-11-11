@@ -9,11 +9,25 @@ echo "=== DRY RUN TEST MODE ==="
 echo "This will simulate the installation process without making changes"
 echo ""
 
+# Test CPU support detection
+echo "Testing CPU support detection..."
+if /lib/ld-linux-x86-64.so.2 --help | grep -q "x86-64-v4 (supported, searched)"; then
+    echo "✅ CPU supports x86-64-v4 - would use cachyos-v4"
+    preferred_repo="cachyos-v4"
+else
+    echo "❌ CPU does not support x86-64-v4 - would use cachyos-v3"
+    preferred_repo="cachyos-v3"
+fi
+
 # Test download and extraction (dry run)
 echo "Testing download and extraction..."
 echo "Would run: curl -O https://mirror.cachyos.org/cachyos-repo.tar.xz"
 echo "Would run: tar xvf cachyos-repo.tar.xz && cd cachyos-repo"
-echo "Would run: sudo ./cachyos-repo.sh"
+if [[ "$preferred_repo" == "cachyos-v4" ]]; then
+    echo "Would run: sudo ./install-v4-repo.awk"
+else
+    echo "Would run: sudo ./install-repo.awk"
+fi
 echo "Would run: cd -"
 echo ""
 
@@ -30,7 +44,7 @@ fi
 
 # Test CachyOS packages
 packages=("cachyos-kernel-manager" "cachyos-hello" "fish" "lapce" "zed")
-echo "Would run: paru -S --noconfirm --repo cachyos ${packages[*]}"
+echo "Would run: paru -S --noconfirm --repo $preferred_repo ${packages[*]}"
 
 for pkg in "${packages[@]}"; do
     if paru -Ss "$pkg" &> /dev/null; then
@@ -61,8 +75,9 @@ else
     echo "❌ cachyos-rate-mirrors not found"
 fi
 
-# Test directory change
+# Test hardware detection
 echo ""
+echo "Would run: paru -S --noconfirm --repo $preferred_repo chwd"
 echo "Would run: sudo chwd -a /"
 if command -v chwd &> /dev/null; then
     echo "✅ chwd is available"
