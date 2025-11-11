@@ -324,7 +324,7 @@ install_hardware_detection() {
     print_status "Installing chwd for hardware optimization..."
     paru -S --needed --noconfirm chwd
     print_status "Optimizing system..."
-    sudo chwd -a /
+    sudo chwd -a
 }
 
 # Function to install packages
@@ -335,13 +335,19 @@ install_packages() {
     # Remove conflicting packages first
     if pacman -Qi tldr &>/dev/null; then
         print_status "Removing conflicting tldr package..."
-        sudo pacman -R --noconfirm tldr
+        echo "y" | sudo pacman -R tldr
     fi
     
-    # CachyOS packages - use --needed to skip already installed packages
-    # Handle provider selections automatically
-    paru -S --needed --noconfirm \
-      cachyos-kernel-manager cachyos-hello cachyos-fish-config fish lapce zed octopi
+    if pacman -Qi mesa &>/dev/null; then
+        print_status "Removing conflicting mesa package for mesa-git..."
+        echo "y" | sudo pacman -R mesa
+    fi
+    
+    # CachyOS packages - install individually to handle provider selections
+    print_status "Installing CachyOS packages..."
+    for package in cachyos-kernel-manager cachyos-hello cachyos-fish-config fish lapce zed octopi; do
+        echo "1" | paru -S --needed --noconfirm "$package" || true
+    done
     
     # AUR packages - use --needed to skip already installed packages
     paru -S --needed --noconfirm opencode-bin
