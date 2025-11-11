@@ -42,10 +42,48 @@ install_packages() {
     for package in paru-bin yazi lapce zed octopi; do
         install_package "$package"
     done
+}
+
+install_aur_packages() {
+    local packages="yazi lapce zed octopi"
+    local aur_packages=""
     
-    # Install AUR packages with paru (no sudo needed)
-    print_status "Installing AUR packages with paru..."
-    paru -S --needed --noconfirm yazi lapce zed octopi
+    # Check which packages are not in repos
+    for package in $packages; do
+        local found=false
+        
+        # Check *v4 repos
+        for repo in $(grep "^\[.*v4\]" /etc/pacman.conf | sed 's/\[//;s/\]//'); do
+            pacman -Si "$repo/$package" >/dev/null 2>&1 && found=true && break
+        done
+        
+        # Check *v3 repos
+        if [ "$found" = false ]; then
+            for repo in $(grep "^\[.*v3\]" /etc/pacman.conf | sed 's/\[//;s/\]//'); do
+                pacman -Si "$repo/$package" >/dev/null 2>&1 && found=true && break
+            done
+        fi
+        
+        # Check cachyos* repos
+        if [ "$found" = false ]; then
+            for repo in $(grep "^\[cachyos" /etc/pacman.conf | sed 's/\[//;s/\]//'); do
+                pacman -Si "$repo/$package" >/dev/null 2>&1 && found=true && break
+            done
+        fi
+        
+        # If not found in any repo, add to AUR list
+        if [ "$found" = false ]; then
+            aur_packages="$aur_packages $package"
+        fi
+    done
+    
+    # Install AUR packages only if any were found
+    if [ -n "$aur_packages" ]; then
+        print_status "Installing AUR packages:$aur_packages"
+        paru -S --needed --noconfirm $aur_packages
+    else
+        print_status "All packages found in repos, no AUR installation needed"
+    fi
 }
 
 # Main function
@@ -59,6 +97,8 @@ main() {
     print_status "Mirror rating complete!"
     
     install_packages
+    
+    install_aur_packages
     
     print_status "All installations complete!"
 }
