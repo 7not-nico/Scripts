@@ -29,6 +29,10 @@ print_question() {
     echo -e "${BLUE}[QUESTION]${NC} $1"
 }
 
+print_info() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
 # Function to create backup of pacman.conf
 backup_pacman_conf() {
     local backup_file="/etc/pacman.conf.backup.$(date +%Y%m%d_%H%M%S)"
@@ -330,10 +334,65 @@ install_packages() {
     
     # CachyOS packages
     paru -S --noconfirm --repo "$repo" \
-      cachyos-kernel-manager cachyos-hello cachyos-fish-config fish lapce zed
+      cachyos-kernel-manager cachyos-hello cachyos-fish-config fish lapce zed octopi
     
     # AUR packages
     paru -S --noconfirm opencode-bin
+}
+
+###UPDATE, WE NEED TO MAKE IT LAUNCH cachyos-hello after it has finish the script succefully
+
+# Function to launch cachyos-hello with enhanced user experience and conditional launch
+launch_cachyos_hello_if_desired() {
+    # Check if cachyos-hello command exists
+    if ! command -v cachyos-hello &> /dev/null; then
+        print_warning "cachyos-hello not found - installation may have failed."
+        return 1
+    fi
+    
+    # Check if cachyos-hello is already running
+    if pgrep -f "cachyos-hello" > /dev/null; then
+        print_warning "cachyos-hello appears to be already running."
+        print_status "You can run it manually when the current instance finishes."
+        return 0
+    fi
+    
+    echo
+    print_status "cachyos-hello is the CachyOS welcome and setup wizard."
+    print_status "It helps configure your system with recommended settings."
+    echo
+    
+    # Enhanced user experience - ask user if they want to launch
+    print_question "Would you like to launch cachyos-hello now? [Y/n]: "
+    read -p "" -n 1 -r
+    echo
+    
+    if [[ $REPLY =~ ^[Nn]$ ]]; then
+        print_status "You can run cachyos-hello anytime from the terminal by typing 'cachyos-hello'."
+        return 0
+    fi
+    
+    # Conditional launch with error handling
+    print_status "Launching cachyos-hello..."
+    print_info "Note: You can exit cachyos-hello at any time with Ctrl+C"
+    echo
+    
+    # Launch cachyos-hello and handle the result
+    if cachyos-hello; then
+        echo
+        print_status "cachyos-hello completed successfully."
+        print_status "Your CachyOS system is now optimally configured!"
+    else
+        echo
+        local exit_code=$?
+        if [ $exit_code -eq 130 ]; then
+            print_status "cachyos-hello was cancelled by user (Ctrl+C)."
+            print_status "You can run it again anytime with 'cachyos-hello'."
+        else
+            print_warning "cachyos-hello encountered an error (exit code: $exit_code)."
+            print_status "You can try running it manually or check the logs for details."
+        fi
+    fi
 }
 
 # Main execution
@@ -358,6 +417,9 @@ main() {
     
     print_status "Installation complete!"
     print_status "Use 'cachyos-kernel-manager' for kernels and 'fish' as shell."
+    
+    # Enhanced user experience + conditional launch for cachyos-hello
+    launch_cachyos_hello_if_desired
 }
 
 # Run main function
