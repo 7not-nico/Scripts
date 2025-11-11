@@ -128,14 +128,11 @@ detect_optimal_repo() {
 run_test() {
     local test_scenario="$1"
     local config_file="$2"
+    local preferred_repo="$3"  # Pass optimal repo as parameter
     
     echo "=== TEST SCENARIO: $test_scenario ==="
     echo "Testing with config file: $config_file"
     echo
-    
-    # Detect optimal repo
-    local preferred_repo
-    preferred_repo=$(detect_optimal_repo)
     
     # Detect existing repositories
     local existing_repos
@@ -244,11 +241,14 @@ Server = https://mirror.cachyos.org/$repo/$arch
 Server = https://mirror.cachyos.org/$repo/v3/$arch
 EOF
 
+# Detect optimal repo once
+preferred_repo=$(detect_optimal_repo)
+
 # Run all test scenarios
-run_test "No CachyOS Repositories" "test_no_repos.conf"
-run_test "Optimal Repository Already Present" "test_optimal_v3.conf"
-run_test "Conflicting Repositories (v3 vs v4)" "test_conflicting.conf"
-run_test "Compatible Repositories (base + v3)" "test_compatible.conf"
+run_test "No CachyOS Repositories" "test_no_repos.conf" "$preferred_repo"
+run_test "Optimal Repository Already Present" "test_optimal_v3.conf" "$preferred_repo"
+run_test "Conflicting Repositories (v3 vs v4)" "test_conflicting.conf" "$preferred_repo"
+run_test "Compatible Repositories (base + v3)" "test_compatible.conf" "$preferred_repo"
 
 # Clean up test files
 rm -f test_*.conf
