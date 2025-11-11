@@ -35,8 +35,33 @@ if ! command -v cachyos-rate-mirrors &> /dev/null; then
     echo "Running mirror ranking..."
     sudo cachyos-rate-mirrors --force
 else
-    echo "cachyos-rate-mirrors already installed. Running mirror ranking..."
-    sudo cachyos-rate-mirrors --force
+    echo "cachyos-rate-mirrors already installed."
+    
+    # Check if mirrors have been ranked before (check for recent mirrorlist updates)
+    arch_mirrorlist="/etc/pacman.d/mirrorlist"
+    cachyos_mirrorlist="/etc/pacman.d/cachyos-mirrorlist"
+    
+    mirrors_ranked=false
+    if [[ -f "$arch_mirrorlist" ]] && grep -q "Server = https://.*archlinux" "$arch_mirrorlist"; then
+        if [[ -f "$cachyos_mirrorlist" ]] && grep -q "Server = https://.*cachyos" "$cachyos_mirrorlist"; then
+            mirrors_ranked=true
+        fi
+    fi
+    
+    if $mirrors_ranked; then
+        echo "Mirror ranking has been run before."
+        read -p "Do you want to run mirror ranking again? [y/N]: " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            echo "Running mirror ranking..."
+            sudo cachyos-rate-mirrors --force
+        else
+            echo "Skipping mirror ranking."
+        fi
+    else
+        echo "Running mirror ranking..."
+        sudo cachyos-rate-mirrors --force
+    fi
 fi
 
 # Install and run hardware detection tool
