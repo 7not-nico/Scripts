@@ -6,7 +6,7 @@
 set -e
 
 # Check if CachyOS repos are already configured
-if ! grep -q "cachyos\|cachyos-v3\|cachyos-v4" /etc/pacman.conf; then
+if ! grep -q "cachyos\|cachyos-v3\|cachyos-v4\|cachyos-znver4" /etc/pacman.conf; then
     echo "CachyOS repos not found. Setting up repository..."
     # Download and setup CachyOS repository
     curl -O https://mirror.cachyos.org/cachyos-repo.tar.xz
@@ -16,6 +16,20 @@ if ! grep -q "cachyos\|cachyos-v3\|cachyos-v4" /etc/pacman.conf; then
 else
     echo "CachyOS repos already configured."
 fi
+
+# Determine which CachyOS repository is configured and active
+ACTIVE_CACHYOS_REPO=""
+if grep -q "^\[cachyos-v3\]" /etc/pacman.conf && ! grep -q "^\[cachyos-v3\]" /etc/pacman.conf | grep -q "#"; then
+    ACTIVE_CACHYOS_REPO="cachyos-v3"
+elif grep -q "^\[cachyos-v4\]" /etc/pacman.conf && ! grep -q "^\[cachyos-v4\]" /etc/pacman.conf | grep -q "#"; then
+    ACTIVE_CACHYOS_REPO="cachyos-v4"
+elif grep -q "^\[cachyos-znver4\]" /etc/pacman.conf && ! grep -q "^\[cachyos-znver4\]" /etc/pacman.conf | grep -q "#"; then
+    ACTIVE_CACHYOS_REPO="cachyos-znver4"
+elif grep -q "^\[cachyos\]" /etc/pacman.conf && ! grep -q "^\[cachyos\]" /etc/pacman.conf | grep -q "#"; then
+    ACTIVE_CACHYOS_REPO="cachyos"
+fi
+
+echo "Active CachyOS repository detected: $ACTIVE_CACHYOS_REPO"
 
 # Check if cachyos-rate-mirrors is installed
 if ! command -v cachyos-rate-mirrors &> /dev/null; then
@@ -72,17 +86,34 @@ sudo chwd -a /
 
 # Install all packages from appropriate repositories
 echo "Installing packages..."
-# Install from cachyos-v3 repo
-paru -S --noconfirm --repo cachyos-v3 \
-  cachyos-kernel-manager cachyos-hello
 
-# Install from cachyos repo
+# Install from the active CachyOS repository (v3, v4, or znver4)
+if [[ -n "$ACTIVE_CACHYOS_REPO" ]]; then
+    echo "Installing from $ACTIVE_CACHYOS_REPO..."
+    paru -S --noconfirm --repo "$ACTIVE_CACHYOS_REPO" \
+      cachyos-kernel-manager cachyos-hello
+else
+    echo "Warning: Could not detect active CachyOS repository, trying cachyos-v3..."
+    paru -S --noconfirm --repo cachyos-v3 \
+      cachyos-kernel-manager cachyos-hello
+fi
+
+# Install from cachyos repo (base repo)
 paru -S --noconfirm --repo cachyos \
   cachyos-fish-config
 
-# Install from cachyos-extra-v3 repo  
-paru -S --noconfirm --repo cachyos-extra-v3 \
-  fish
+# Install from appropriate extra repository based on active repo
+if [[ "$ACTIVE_CACHYOS_REPO" == "cachyos-v4" ]]; then
+    paru -S --noconfirm --repo cachyos-extra-v4 \
+      fish
+elif [[ "$ACTIVE_CACHYOS_REPO" == "cachyos-znver4" ]]; then
+    paru -S --noconfirm --repo cachyos-extra-znver4 \
+      fish
+else
+    # Default to cachyos-extra-v3
+    paru -S --noconfirm --repo cachyos-extra-v3 \
+      fish
+fi
 
 # Install from extra repo
 paru -S --noconfirm --repo extra \
