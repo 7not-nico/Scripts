@@ -12,20 +12,6 @@ print_status() {
     echo -e "${GREEN}[INFO]${NC} $1"
 }
 
-check_repos() {
-    local cache_file="/tmp/repos_cache"
-    
-    if [ -f "$cache_file" ] && [ $(find "$cache_file" -mtime -1 2>/dev/null) ]; then
-        print_status "Using cached repo list"
-        cat "$cache_file"
-        return
-    fi
-    
-    print_status "Caching available repos..."
-    grep "^\[" /etc/pacman.conf | sed 's/\[//;s/\]//' > "$cache_file"
-    cat "$cache_file"
-}
-
 check_rate_mirrors_run() {
     local marker_file="/tmp/cachyos_rate_mirrors_run"
     
@@ -38,8 +24,6 @@ check_rate_mirrors_run() {
 }
 
 main() {
-    check_repos
-    
     if check_rate_mirrors_run; then
         print_status "Skipping mirror rating - already done recently"
     else
