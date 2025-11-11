@@ -131,10 +131,16 @@ The installation script has been debugged and fixed for the following problems:
 - Removed incorrect `--repo` flags causing package not found errors
 - Ensured clean repository name capture for package installation
 
+**System Update Detection:**
+- Added comprehensive update checking with yay installation fallback
+- Implemented restart workflow for post-update scenarios
+- Automatic system update before installation process
+
 **Package Installation:**
 - Added `--needed` flag to skip already installed packages
 - Implemented `--ask=4` for automatic conflict resolution
 - Added error handling with `|| true` to continue on failures
+- Added new packages: `dropbox` (official repos) and `zed-browser-bin` (AUR)
 
 **Hardware Optimization:**
 - Fixed `sudo chwd -a` command syntax (removed trailing `/`)
@@ -159,6 +165,8 @@ The installation script has been debugged and fixed for the following problems:
 ## Technical Implementation
 
 ### Core Functions
+- `check_and_perform_updates()`: System update detection and installation
+- `ensure_yay_available()`: Yay installation fallback
 - `detect_optimal_repo()`: CPU-based repository selection
 - `detect_cachyos_repos()`: Repository analysis
 - `check_repo_conflicts()`: Conflict identification
@@ -201,6 +209,44 @@ The installation script has been debugged and fixed for the following problems:
 - **Version control**: Proper git workflow with feature branches
 - **Code quality**: Clean, documented, and maintainable
 - **Extensibility**: Easy to add new features
+
+## Installation Workflow
+
+### Step 0: System Update Detection
+- **Action**: Check for available system updates using yay
+- **Fallback**: Install yay if not available
+- **Process**: Apply updates if found, then restart system
+- **User interaction**: Automatic, with clear restart instructions
+
+### Step 1: Repository Management
+- **Action**: CPU-based repository selection and configuration
+- **Options**: v3, v4, znver4 based on hardware support
+- **Safety**: Automatic backup before any changes
+
+### Step 2: Package Manager Installation
+- **Action**: Install paru for AUR package management
+- **Verification**: Check if already installed
+
+### Step 3: Mirror Ranking
+- **Action**: Optimize package download speeds
+- **User choice**: Option to skip if previously run
+
+### Step 4: Hardware Detection
+- **Action**: Install chwd for hardware optimization
+- **Process**: Automatic graphics driver configuration
+
+### Step 5: Package Installation
+- **Action**: Install CachyOS packages and additional tools
+- **New packages**: dropbox, zed-browser-bin
+- **Conflict handling**: Automatic resolution with fallbacks
+
+### Step 6: Orphan Removal
+- **Action**: Clean up unused dependencies
+- **Safety**: Error handling for partial removals
+
+### Step 7: Completion
+- **Action**: Launch cachyos-hello if desired
+- **Information**: Provide usage guidance
 
 ## Installation Scenarios
 

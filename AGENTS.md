@@ -13,6 +13,8 @@ awk -f cachyos-repo/install-repo.awk /etc/pacman.conf
 - Bash: `set -e`, `snake_case()` functions, `local` variables
 - Use `print_status()`, `print_warning()`, `print_error()` for output
 - Redirect status messages to stderr in functions that return values
+- Use `yay -Qu` for quiet update checking
+- Exit with code 0 after updates, require user restart
 - AWK: Follow GNU license header, use BEGIN/END blocks
 
 ## Error Handling
@@ -27,6 +29,8 @@ awk -f cachyos-repo/install-repo.awk /etc/pacman.conf
 - Use `--ask=4` for automatic conflict resolution
 - Remove `--repo` flags, let paru find packages automatically
 - Preserve critical system packages (mesa for Hyprland)
+- Install yay automatically if not available for update checking
+- Use `|| true` for non-critical package installation failures
 
 ## Repository Management
 - Detect existing repos before changes
@@ -39,3 +43,6 @@ awk -f cachyos-repo/install-repo.awk /etc/pacman.conf
 - Verify backup creation, user interaction flows, CPU detection
 - Test hardware optimization conflict handling
 - Test orphan package removal functionality
+- Test system update detection and restart workflow
+- Test yay installation fallback scenarios
+- Test new package installation (dropbox, zed-browser-bin)

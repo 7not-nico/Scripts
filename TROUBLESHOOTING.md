@@ -10,10 +10,43 @@ Quick solutions for common CachyOS installation issues.
 | `up to date -- reinstalling` | Add --needed flag |
 | `unresolvable package conflicts` | Use --ask=4 flag |
 | `script failed!` | Add error handling |
+| `yay not found` | Script installs yay automatically |
+| `system requires restart` | Restart and run script again |
 
 ## Common Issues and Solutions
 
-### 1. Repository Variable Capture Problems
+### 1. System Update Issues
+
+**Symptoms:**
+- `yay: command not found`
+- Script exits after applying updates
+- "Please restart your system and run this script again"
+
+**Solutions:**
+
+#### Yay not found:
+```bash
+# Script installs yay automatically, but if it fails:
+sudo pacman -S --needed --noconfirm yay
+```
+
+#### Update requires restart:
+```bash
+# This is normal behavior - restart and run script again:
+sudo reboot
+./install_cachyos.sh
+```
+
+#### Update fails:
+```bash
+# Manual update check
+yay -Syu --noconfirm
+
+# Or use pacman instead
+sudo pacman -Syu --noconfirm
+```
+
+### 2. Repository Variable Capture Problems
 
 **Symptoms:**
 - `error: target not found: [INFO] Checking CPU support...`
@@ -32,16 +65,23 @@ result=$(manage_repositories 2>/dev/null)
 echo "Result: '$result'"
 ```
 
-### 2. Package Installation Failures
+### 3. Package Installation Failures
 
 **Symptoms:**
 - `error: target not found: cachyos-v3`
 - Package not found errors
+- `dropbox` or `zed-browser-bin` installation failures
 
 **Solution:**
 ```bash
 # Remove --repo flag, let paru find packages
 paru -S --needed --noconfirm package_name
+
+# For AUR packages like zed-browser-bin:
+paru -S --needed --noconfirm zed-browser-bin || true
+
+# For official packages like dropbox:
+paru -S --needed --ask=4 dropbox || true
 ```
 
 ### 3. Dependency Conflicts

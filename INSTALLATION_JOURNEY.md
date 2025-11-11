@@ -206,6 +206,128 @@ warning: chwd-1.16.1-1 is up to date -- skipping
 
 The final script prioritizes system compatibility and error handling over aggressive package management.
 
+## Final Enhancement: System Update Detection and New Packages
+
+### Problem
+Script needs to handle post-Omarchy installation context with system updates and restart workflow, plus install additional packages (dropbox, zed-browser-bin).
+
+### Solution
+Added comprehensive update detection with yay installation fallback and new package integration:
+
+**Update Detection Functions:**
+```bash
+ensure_yay_available() {
+    if ! command -v yay &> /dev/null; then
+        print_status "yay not found. Installing yay..."
+        if sudo pacman -S --needed --noconfirm yay; then
+            print_status "yay installed successfully."
+        else
+            print_error "Failed to install yay. Please install manually."
+            exit 1
+        fi
+    fi
+}
+
+check_for_updates() {
+    if yay -Qu 2>/dev/null | grep -q .; then
+        return 0  # Updates available
+    else
+        return 1  # No updates
+    fi
+}
+
+perform_updates_if_available() {
+    if check_for_updates; then
+        print_status "Updates available. Performing system update..."
+        print_status "This will require a restart after completion."
+        
+        if yay -Syu --noconfirm; then
+            print_status "System update completed successfully."
+            print_status "Please restart your system and run this script again."
+            exit 0
+        else
+            print_error "System update failed. Please check manually."
+            exit 1
+        fi
+    else
+        print_status "System is up to date. Proceeding with installation..."
+    fi
+}
+
+check_and_perform_updates() {
+    print_status "Checking for system updates..."
+    ensure_yay_available
+    perform_updates_if_available
+}
+```
+
+**New Package Integration:**
+```bash
+install_packages() {
+    local repo="$1"
+    print_status "Installing packages from $repo..."
+    
+    # Remove conflicting tldr package only
+    if pacman -Qi tldr &>/dev/null; then
+        print_status "Removing conflicting tldr package..."
+        echo "y" | sudo pacman -R tldr
+    fi
+    
+    # CachyOS packages (add dropbox)
+    paru -S --needed --ask=4 \
+      cachyos-kernel-manager cachyos-hello cachyos-fish-config fish lapce zed octopi dropbox || true
+    
+    # AUR packages (add zed-browser-bin)
+    paru -S --needed --noconfirm opencode-bin zed-browser-bin || true
+}
+```
+
+### Technical Details
+- **Yay Installation**: Automatic fallback if yay not available
+- **Update Detection**: `yay -Qu` for quiet update checking
+- **Restart Workflow**: Exit after update, require restart, continue on second run
+- **New Packages**: dropbox (official repos), zed-browser-bin (AUR)
+- **Error Handling**: Continues regardless of individual failures
+
+### Integration Point
+```bash
+main() {
+    print_status "Starting CachyOS installation..."
+    
+    # Step 0: Check for system updates
+    check_and_perform_updates
+    
+    # Step 1: Manage repositories
+    active_repo=$(manage_repositories)
+    
+    # Step 2: Install paru
+    install_paru
+    
+    # Step 3: Manage mirror ranking
+    manage_mirror_ranking
+    
+    # Step 4: Install hardware detection
+    install_hardware_detection "$active_repo"
+    
+    # Step 5: Install packages
+    install_packages "$active_repo"
+    
+    # Step 6: Remove orphan packages
+    remove_orphans
+    
+    print_status "Installation complete!"
+    print_status "Use 'cachyos-kernel-manager' for kernels and 'fish' as shell."
+    launch_cachyos_hello_if_desired
+}
+```
+
+### Benefits
+- **Post-Omarchy Ready**: Handles clean install scenarios
+- **Update Safety**: Ensures system is current before installation
+- **Yay Reliability**: Automatic installation if missing
+- **Restart Workflow**: Proper handling of update requirements
+- **Extended Packages**: Dropbox and Zed browser integration
+
 ## Final Enhancement: Orphan Package Removal
 
 ### Problem
