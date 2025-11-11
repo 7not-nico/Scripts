@@ -332,12 +332,12 @@ install_packages() {
     local repo="$1"
     print_status "Installing packages from $repo..."
     
-    # CachyOS packages
-    paru -S --noconfirm --repo "$repo" \
+    # CachyOS packages - use --needed to skip already installed packages
+    paru -S --needed --noconfirm --repo "$repo" \
       cachyos-kernel-manager cachyos-hello cachyos-fish-config fish lapce zed octopi
     
-    # AUR packages
-    paru -S --noconfirm opencode-bin
+    # AUR packages - use --needed to skip already installed packages
+    paru -S --needed --noconfirm opencode-bin
 }
 
 ###UPDATE, WE NEED TO MAKE IT LAUNCH cachyos-hello after it has finish the script succefully
