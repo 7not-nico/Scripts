@@ -344,10 +344,10 @@ install_packages() {
     # CachyOS packages - use paru's automatic conflict resolution
     print_status "Installing CachyOS packages..."
     paru -S --needed --ask=4 \
-      cachyos-kernel-manager cachyos-hello cachyos-fish-config fish lapce zed octopi || true
+      cachyos-kernel-manager cachyos-hello cachyos-fish-config fish lapce zed octopi dropbox || true
     
     # AUR packages - use --needed to skip already installed packages
-    paru -S --needed --noconfirm opencode-bin || true
+    paru -S --needed --noconfirm opencode-bin zed-browser-bin || true
 }
 
 # Function to remove orphan packages
@@ -424,27 +424,82 @@ launch_cachyos_hello_if_desired() {
     fi
 }
 
+# Function to ensure yay is available
+ensure_yay_available() {
+    if ! command -v yay &> /dev/null; then
+        print_status "yay not found. Installing yay..."
+        if sudo pacman -S --needed --noconfirm yay; then
+            print_status "yay installed successfully."
+        else
+            print_error "Failed to install yay. Please install manually."
+            exit 1
+        fi
+    fi
+}
+
+# Function to check for available updates
+check_for_updates() {
+    if yay -Qu 2>/dev/null | grep -q .; then
+        return 0  # Updates available
+    else
+        return 1  # No updates
+    fi
+}
+
+# Function to perform system updates
+perform_updates_if_available() {
+    if check_for_updates; then
+        print_status "Updates available. Performing system update..."
+        print_status "This will require a restart after completion."
+        
+        if yay -Syu --noconfirm; then
+            print_status "System update completed successfully."
+            print_status "Please restart your system and run this script again."
+            exit 0
+        else
+            print_error "System update failed. Please check manually."
+            exit 1
+        fi
+    else
+        print_status "System is up to date. Proceeding with installation..."
+    fi
+}
+
+# Function to check for updates and perform them if needed
+check_and_perform_updates() {
+    print_status "Checking for system updates..."
+    
+    # Ensure yay is available
+    ensure_yay_available
+    
+    # Check for and perform updates
+    perform_updates_if_available
+}
+
 # Main execution
 main() {
     print_status "Starting CachyOS installation..."
+    
+    # Step 0: Check for system updates
+    check_and_perform_updates
     
     # Step 1: Manage repositories
     local active_repo
     active_repo=$(manage_repositories)
     
-    # Step 2: Install paru
+    # Step 1: Install paru
     install_paru
     
-    # Step 3: Manage mirror ranking
+    # Step 2: Manage mirror ranking
     manage_mirror_ranking
     
-    # Step 4: Install hardware detection
+    # Step 3: Install hardware detection
     install_hardware_detection "$active_repo"
     
-    # Step 5: Install packages
+    # Step 4: Install packages
     install_packages "$active_repo"
     
-    # Step 6: Remove orphan packages
+    # Step 5: Remove orphan packages
     remove_orphans
     
     print_status "Installation complete!"
