@@ -39,7 +39,9 @@ else
     sudo cachyos-rate-mirrors --force
 fi
 
-# Optimize system for hardware
+# Install and run hardware detection tool
+echo "Installing chwd for hardware optimization..."
+paru -S --noconfirm --repo cachyos-v3 chwd
 echo "Optimizing system..."
 sudo chwd -a /
 
