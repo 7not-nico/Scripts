@@ -350,6 +350,25 @@ install_packages() {
     paru -S --needed --noconfirm opencode-bin || true
 }
 
+# Function to remove orphan packages
+remove_orphans() {
+    print_status "Checking for orphan packages..."
+    
+    # Get list of orphans
+    local orphans=$(pacman -Qtdq)
+    
+    if [ -n "$orphans" ]; then
+        print_status "Removing orphan packages..."
+        if sudo pacman -Rns $orphans 2>/dev/null; then
+            print_status "Orphan packages removed successfully."
+        else
+            print_warning "Some orphan packages could not be removed."
+        fi
+    else
+        print_status "No orphan packages found."
+    fi
+}
+
 ###UPDATE, WE NEED TO MAKE IT LAUNCH cachyos-hello after it has finish the script succefully
 
 # Function to launch cachyos-hello with enhanced user experience and conditional launch
@@ -424,6 +443,9 @@ main() {
     
     # Step 5: Install packages
     install_packages "$active_repo"
+    
+    # Step 6: Remove orphan packages
+    remove_orphans
     
     print_status "Installation complete!"
     print_status "Use 'cachyos-kernel-manager' for kernels and 'fish' as shell."
