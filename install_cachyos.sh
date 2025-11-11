@@ -324,7 +324,10 @@ install_hardware_detection() {
     print_status "Installing chwd for hardware optimization..."
     paru -S --needed --noconfirm chwd
     print_status "Optimizing system..."
-    sudo chwd -a
+    if ! sudo chwd -a; then
+        print_warning "Hardware optimization encountered dependency conflicts."
+        print_status "This is normal on some systems. Continuing with installation..."
+    fi
 }
 
 # Function to install packages
