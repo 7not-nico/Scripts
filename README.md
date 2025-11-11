@@ -13,6 +13,25 @@ Advanced installation with CPU detection and repo optimization.
 ### `rate-mirrors.sh`
 Mirror optimization + package installation (fish, octopi, zen-browser-bin).
 
+## Online Execution
+
+Click the copy icon (📋) in the top-right of each code block:
+
+```bash
+# Simple installation
+bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/install_cachyos.sh)
+```
+
+```bash
+# Complex installation
+bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/complexver)
+```
+
+```bash
+# Mirror setup only
+bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/rate-mirrors.sh)
+```
+
 ## Quick Start
 
 ```bash
