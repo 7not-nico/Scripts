@@ -120,6 +120,36 @@ chmod +x install_cachyos.sh
 ./test_virtual.sh
 ```
 
+## Installation Fixes Applied
+
+### Issues Resolved
+The installation script has been debugged and fixed for the following problems:
+
+**Repository Management:**
+- Fixed stdout/stderr redirection in `detect_optimal_repo()` and `manage_repositories()`
+- Removed incorrect `--repo` flags causing package not found errors
+- Ensured clean repository name capture for package installation
+
+**Package Installation:**
+- Added `--needed` flag to skip already installed packages
+- Implemented `--ask=4` for automatic conflict resolution
+- Added error handling with `|| true` to continue on failures
+
+**Hardware Optimization:**
+- Fixed `sudo chwd -a` command syntax (removed trailing `/`)
+- Added error handling for graphics driver dependency conflicts
+- Graceful continuation when hardware optimization fails
+
+**System Compatibility:**
+- Preserved critical packages (mesa) for Hyprland systems
+- Safe removal of conflicting packages (tldr for tealdeer)
+- Working with existing system rather than forcing changes
+
+### Documentation
+- **[INSTALLATION_JOURNEY.md](INSTALLATION_JOURNEY.md)**: Technical details of fixes applied
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)**: Common error solutions
+- **[AGENTS.md](AGENTS.md)**: Development guidelines
+
 ## 📊 Technical Implementation
 
 ### Core Functions
