@@ -113,13 +113,9 @@ simulate_user_choice() {
 
 # Function to check CPU support for optimal repository selection
 detect_optimal_repo() {
-    print_status "Checking CPU support for optimal repository selection..."
-    
     if /lib/ld-linux-x86-64.so.2 --help | grep -q "x86-64-v4 (supported, searched)"; then
-        print_status "✅ CPU supports x86-64-v4 instruction set"
         echo "cachyos-v4"
     else
-        print_status "❌ CPU does not support x86-64-v4, using v3"
         echo "cachyos-v3"
     fi
 }
@@ -242,7 +238,13 @@ Server = https://mirror.cachyos.org/$repo/v3/$arch
 EOF
 
 # Detect optimal repo once
+print_status "Checking CPU support for optimal repository selection..."
 preferred_repo=$(detect_optimal_repo)
+if [[ "$preferred_repo" == "cachyos-v4" ]]; then
+    print_status "✅ CPU supports x86-64-v4 instruction set"
+else
+    print_status "❌ CPU does not support x86-64-v4, using v3"
+fi
 
 # Run all test scenarios
 run_test "No CachyOS Repositories" "test_no_repos.conf" "$preferred_repo"
