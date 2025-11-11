@@ -322,7 +322,7 @@ manage_mirror_ranking() {
 install_hardware_detection() {
     local repo="$1"
     print_status "Installing chwd for hardware optimization..."
-    paru -S --noconfirm --repo "$repo" chwd
+    paru -S --needed --noconfirm chwd
     print_status "Optimizing system..."
     sudo chwd -a /
 }
