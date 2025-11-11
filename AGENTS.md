@@ -16,6 +16,7 @@ awk -f cachyos-repo/install-repo.awk /etc/pacman.conf
 - Use `yay -Qu` for quiet update checking
 - Exit with code 0 after updates, require user restart
 - AWK: Follow GNU license header, use BEGIN/END blocks
+- Keep it simple and stupid (KISS) - straightforward logic, minimal complexity
 
 ## Error Handling
 - Check command exit codes, clear error messages
