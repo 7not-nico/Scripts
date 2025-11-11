@@ -2,8 +2,11 @@
 
 ## Commands
 ```bash
-# Syntax check
-bash -n install_cachyos.sh
+# Syntax check all scripts
+bash -n *.sh
+
+# Test single script
+bash -n rate-mirrors.sh
 
 # Test AWK scripts
 awk -f cachyos-repo/install-repo.awk /etc/pacman.conf
@@ -11,39 +14,23 @@ awk -f cachyos-repo/install-repo.awk /etc/pacman.conf
 
 ## Code Style
 - Bash: `set -e`, `snake_case()` functions, `local` variables
-- Use `print_status()`, `print_warning()`, `print_error()` for output
-- Redirect status messages to stderr in functions that return values
-- Use `yay -Qu` for quiet update checking
-- Exit with code 0 after updates, require user restart
-- AWK: Follow GNU license header, use BEGIN/END blocks
-- Keep it simple and stupid (KISS) - straightforward logic, minimal complexity
+- Use `print_status()` with GREEN/NC colors for output
+- KISS principle - simple, direct, minimal complexity
+- Standardize on `paru-bin` for AUR package management
+- Use `--needed --noconfirm` flags for package installation
 
 ## Error Handling
 - Check command exit codes, clear error messages
-- Create backups before system changes
 - Exit codes: 0 success, 1 error
-- Use `|| true` to continue on non-critical failures
+- Use `|| true` for non-critical failures
 - Wrap critical commands in error handling blocks
 
-## Package Installation
-- Use `--needed` flag to skip already installed packages
-- Use `--ask=4` for automatic conflict resolution
-- Remove `--repo` flags, let paru find packages automatically
-- Preserve critical system packages (mesa for Hyprland)
-- Install yay automatically if not available for update checking
-- Use `|| true` for non-critical package installation failures
-
-## Repository Management
-- Detect existing repos before changes
-- Get user consent for destructive operations
-- Return only repo names from functions (redirect other output)
-- Handle v3/v4/znver4 conflicts
+## Package Management
+- Use `paru -S --needed --noconfirm` for AUR packages
+- Install `paru-bin` with fallback to makepkg if needed
+- Always push changes to git after modifications
 
 ## Testing
-- Test all repo scenarios (no repos, optimal, compatible, conflicting)
-- Verify backup creation, user interaction flows, CPU detection
-- Test hardware optimization conflict handling
-- Test orphan package removal functionality
-- Test system update detection and restart workflow
-- Test yay installation fallback scenarios
-- Test new package installation (dropbox, zen-browser-bin, shortwave)
+- Test script syntax with `bash -n`
+- Verify online execution with curl/bash pipes
+- Test package installation workflows
