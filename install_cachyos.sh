@@ -335,25 +335,19 @@ install_packages() {
     local repo="$1"
     print_status "Installing packages from $repo..."
     
-    # Remove conflicting packages first
+    # Remove conflicting tldr package only (mesa is critical for system)
     if pacman -Qi tldr &>/dev/null; then
         print_status "Removing conflicting tldr package..."
         echo "y" | sudo pacman -R tldr
     fi
     
-    if pacman -Qi mesa &>/dev/null; then
-        print_status "Removing conflicting mesa package for mesa-git..."
-        echo "y" | sudo pacman -R mesa
-    fi
-    
-    # CachyOS packages - install individually to handle provider selections
+    # CachyOS packages - use paru's automatic conflict resolution
     print_status "Installing CachyOS packages..."
-    for package in cachyos-kernel-manager cachyos-hello cachyos-fish-config fish lapce zed octopi; do
-        echo "1" | paru -S --needed --noconfirm "$package" || true
-    done
+    paru -S --needed --ask=4 \
+      cachyos-kernel-manager cachyos-hello cachyos-fish-config fish lapce zed octopi || true
     
     # AUR packages - use --needed to skip already installed packages
-    paru -S --needed --noconfirm opencode-bin
+    paru -S --needed --noconfirm opencode-bin || true
 }
 
 ###UPDATE, WE NEED TO MAKE IT LAUNCH cachyos-hello after it has finish the script succefully
