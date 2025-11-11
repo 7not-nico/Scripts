@@ -1,0 +1,115 @@
+#!/bin/bash
+
+# CachyOS Automated Installation Script
+# Usage: ./install_cachyos.sh
+
+set -e
+
+# Check CPU support for optimal repository selection
+echo "Checking CPU support..."
+if /lib/ld-linux-x86-64.so.2 --help | grep -q "x86-64-v4 (supported, searched)"; then
+    echo "✅ CPU supports x86-64-v4 instruction set"
+    preferred_repo="cachyos-v4"
+else
+    echo "❌ CPU does not support x86-64-v4, using v3"
+    preferred_repo="cachyos-v3"
+fi
+
+# Check if CachyOS repos are already configured
+if grep -q "$preferred_repo" /etc/pacman.conf; then
+    echo "CachyOS $preferred_repo repos already configured."
+elif grep -q "cachyos\|cachyos-v3\|cachyos-v4\|cachyos-znver4" /etc/pacman.conf; then
+    echo "Other CachyOS repos found. Switching to optimal $preferred_repo..."
+    # Download and extract the installer
+    curl -O https://mirror.cachyos.org/cachyos-repo.tar.xz
+    tar xvf cachyos-repo.tar.xz && cd cachyos-repo
+    
+    # Remove existing repos and install optimal one
+    sudo ./remove-repo.awk
+    if [[ "$preferred_repo" == "cachyos-v4" ]]; then
+        sudo ./install-v4-repo.awk
+    else
+        sudo ./install-repo.awk
+    fi
+    cd -
+else
+    echo "CachyOS repos not found. Setting up optimal $preferred_repo repository..."
+    # Download and extract the installer
+    curl -O https://mirror.cachyos.org/cachyos-repo.tar.xz
+    tar xvf cachyos-repo.tar.xz && cd cachyos-repo
+    
+    # Install the optimal repository
+    if [[ "$preferred_repo" == "cachyos-v4" ]]; then
+        sudo ./install-v4-repo.awk
+    else
+        sudo ./install-repo.awk
+    fi
+    cd -
+fi
+
+# Check if cachyos-rate-mirrors is installed
+if ! command -v cachyos-rate-mirrors &> /dev/null; then
+    echo "cachyos-rate-mirrors not found. Installing paru and cachyos-rate-mirrors..."
+
+    # Check if paru is already installed (either paru or paru-bin)
+    if ! command -v paru &> /dev/null; then
+        echo "Installing paru..."
+        yay -S --noconfirm paru
+    else
+        echo "paru already installed."
+    fi
+
+    # Install and run mirror ranking tool
+    echo "Installing cachyos-rate-mirrors..."
+    paru -S --noconfirm cachyos-rate-mirrors
+    echo "Running mirror ranking..."
+    sudo cachyos-rate-mirrors --force
+else
+    echo "cachyos-rate-mirrors already installed."
+    
+    # Check if mirrors have been ranked before (check for recent mirrorlist updates)
+    arch_mirrorlist="/etc/pacman.d/mirrorlist"
+    cachyos_mirrorlist="/etc/pacman.d/cachyos-mirrorlist"
+    
+    mirrors_ranked=false
+    if [[ -f "$arch_mirrorlist" ]] && grep -q "Server = https://.*archlinux" "$arch_mirrorlist"; then
+        if [[ -f "$cachyos_mirrorlist" ]] && grep -q "Server = https://.*cachyos" "$cachyos_mirrorlist"; then
+            mirrors_ranked=true
+        fi
+    fi
+    
+    if $mirrors_ranked; then
+        echo "Mirror ranking has been run before."
+        read -p "Do you want to run mirror ranking again? [y/N]: " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            echo "Running mirror ranking..."
+            sudo cachyos-rate-mirrors --force
+        else
+            echo "Skipping mirror ranking."
+        fi
+    else
+        echo "Running mirror ranking..."
+        sudo cachyos-rate-mirrors --force
+    fi
+fi
+
+# Install and run hardware detection tool
+echo "Installing chwd for hardware optimization..."
+paru -S --noconfirm --repo "$preferred_repo" chwd
+echo "Optimizing system..."
+sudo chwd -a /
+
+# Install all packages from optimal repository
+echo "Installing packages from $preferred_repo..."
+
+# Use the preferred repository for CachyOS packages
+paru -S --noconfirm --repo "$preferred_repo" \
+  cachyos-kernel-manager cachyos-hello cachyos-fish-config fish lapce zed
+
+# Install from AUR
+paru -S --noconfirm \
+  opencode-bin
+
+echo "Installation complete!"
+echo "Use 'cachyos-kernel-manager' for kernels and 'fish' as shell."
