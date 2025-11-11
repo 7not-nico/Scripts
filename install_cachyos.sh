@@ -226,48 +226,46 @@ manage_repositories() {
     
     if [ ${#existing_repos[@]} -eq 0 ]; then
         # Scenario 1: No CachyOS repos
-        print_status "No CachyOS repositories found. Installing $preferred_repo..."
+        print_status "No CachyOS repositories found. Installing $preferred_repo..." >&2
         backup_pacman_conf >/dev/null
-        install_cachyos_repo "$preferred_repo"
+        install_cachyos_repo "$preferred_repo" >/dev/null
         
     elif [[ " ${existing_repos[*]} " =~ " ${preferred_repo} " ]]; then
         # Scenario 2: Optimal repo already exists
-        print_status "Optimal repository $preferred_repo already configured."
+        print_status "Optimal repository $preferred_repo already configured." >&2
         
     elif check_repo_conflicts "${existing_repos[@]}"; then
         # Scenario 4: Conflicting repos exist
-        ask_conflict_resolution "$preferred_repo" "${existing_repos[@]}"
+        ask_conflict_resolution "$preferred_repo" "${existing_repos[@]}" >&2
         local choice=$?
         
         case $choice in
             1)  # Replace
                 backup_pacman_conf >/dev/null
                 remove_existing_repos
-                install_cachyos_repo "$preferred_repo"
+                install_cachyos_repo "$preferred_repo" >/dev/null
                 ;;
             2)  # Keep
-                print_warning "Keeping existing repositories as requested."
-                print_warning "Note: Your system may not be using the optimal repository."
+                print_warning "Keeping existing repositories as requested." >&2
+                print_warning "Note: Your system may not be using the optimal repository." >&2
                 preferred_repo="existing"  # Use existing repos for package installation
                 ;;
             3)  # Add alongside
                 backup_pacman_conf >/dev/null
-                install_cachyos_repo "$preferred_repo"
+                install_cachyos_repo "$preferred_repo" >/dev/null
                 ;;
             4)  # Cancel
-                print_error "Installation cancelled by user."
+                print_error "Installation cancelled by user." >&2
                 exit 0
                 ;;
         esac
         
     else
         # Scenario 3: Compatible repos exist, add optimal repo
-        print_status "Adding $preferred_repo alongside existing repositories..."
+        print_status "Adding $preferred_repo alongside existing repositories..." >&2
         backup_pacman_conf >/dev/null
-        install_cachyos_repo "$preferred_repo"
+        install_cachyos_repo "$preferred_repo" >/dev/null
     fi
-    
-    echo "$preferred_repo"
     
     echo "$preferred_repo"
 }
