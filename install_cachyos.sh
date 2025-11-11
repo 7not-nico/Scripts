@@ -41,7 +41,7 @@ fi
 
 # Install and run hardware detection tool
 echo "Installing chwd for hardware optimization..."
-paru -S --noconfirm --repo cachyos-v3 chwd
+paru -S --noconfirm --repo cachyos chwd
 echo "Optimizing system..."
 sudo chwd -a /
 
