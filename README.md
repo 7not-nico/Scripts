@@ -146,6 +146,11 @@ The installation script has been debugged and fixed for the following problems:
 - Safe removal of conflicting packages (tldr for tealdeer)
 - Working with existing system rather than forcing changes
 
+**Orphan Package Removal:**
+- Added `remove_orphans()` function as Step 6 in installation
+- Automatic cleanup of unused dependencies
+- Safe removal with error handling and status feedback
+
 ### Documentation
 - **[INSTALLATION_JOURNEY.md](INSTALLATION_JOURNEY.md)**: Technical details of fixes applied
 - **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)**: Common error solutions

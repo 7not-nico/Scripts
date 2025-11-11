@@ -251,3 +251,41 @@ sudo systemctl restart display-manager
 ```
 
 Some conflicts (graphics drivers) are normal and handled by script.
+
+## Orphan Package Issues
+
+### Orphan Removal Fails
+**Symptoms:**
+- "Some orphan packages could not be removed"
+- Orphan packages remain after installation
+
+**Solutions:**
+```bash
+# Manual orphan removal
+sudo pacman -Rns $(pacman -Qtdq)
+
+# Check what orphans exist
+pacman -Qtdq
+
+# Force remove specific orphans
+sudo pacman -Rdd orphan_package_name
+```
+
+### No Orphans Found
+**Symptoms:**
+- "No orphan packages found" message
+- Expected orphans but none detected
+
+**Solutions:**
+```bash
+# Check all packages
+pacman -Q
+
+# Look for unneeded dependencies
+paccache -r
+
+# Clean package cache
+sudo pacman -Scc
+```
+
+Some conflicts (graphics drivers) are normal and handled by script.

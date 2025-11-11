@@ -38,3 +38,4 @@ awk -f cachyos-repo/install-repo.awk /etc/pacman.conf
 - Test all repo scenarios (no repos, optimal, compatible, conflicting)
 - Verify backup creation, user interaction flows, CPU detection
 - Test hardware optimization conflict handling
+- Test orphan package removal functionality

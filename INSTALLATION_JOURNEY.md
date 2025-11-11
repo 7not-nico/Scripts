@@ -205,3 +205,51 @@ warning: chwd-1.16.1-1 is up to date -- skipping
 - 167.08 MB downloaded, 811.30 MB installed
 
 The final script prioritizes system compatibility and error handling over aggressive package management.
+
+## Final Enhancement: Orphan Package Removal
+
+### Problem
+After package installation, orphan packages (dependencies no longer needed) remain on system, consuming space and potentially causing conflicts.
+
+### Solution
+Added `remove_orphans()` function as Step 6 in installation process:
+
+```bash
+remove_orphans() {
+    print_status "Checking for orphan packages..."
+    
+    # Get list of orphans
+    local orphans=$(pacman -Qtdq)
+    
+    if [ -n "$orphans" ]; then
+        print_status "Removing orphan packages..."
+        if sudo pacman -Rns $orphans 2>/dev/null; then
+            print_status "Orphan packages removed successfully."
+        else
+            print_warning "Some orphan packages could not be removed."
+        fi
+    else
+        print_status "No orphan packages found."
+    fi
+}
+```
+
+### Technical Details
+- **Detection**: `pacman -Qtdq` lists orphan packages quietly
+- **Removal**: `pacman -Rns` removes recursively without saving
+- **Error Handling**: Continues installation regardless of removal outcome
+- **Integration**: Called before completion messages as Step 6
+
+### Integration Point
+```bash
+# Step 5: Install packages
+install_packages "$active_repo"
+
+# Step 6: Remove orphan packages
+remove_orphans
+
+print_status "Installation complete!"
+print_status "Use 'cachyos-kernel-manager' for kernels and 'fish' as shell."
+```
+
+The final script prioritizes system compatibility and error handling over aggressive package management.
