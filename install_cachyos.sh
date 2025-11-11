@@ -45,12 +45,27 @@ paru -S --noconfirm --repo cachyos chwd
 echo "Optimizing system..."
 sudo chwd -a /
 
-# Install all packages from CachyOS v3 repo
+# Install all packages from appropriate repositories
 echo "Installing packages..."
+# Install from cachyos-v3 repo
 paru -S --noconfirm --repo cachyos-v3 \
-  cachyos-kernel-manager cachyos-hello \
-  opencode-bin fish cachyos-fish-config \
+  cachyos-kernel-manager cachyos-hello
+
+# Install from cachyos repo
+paru -S --noconfirm --repo cachyos \
+  cachyos-fish-config
+
+# Install from cachyos-extra-v3 repo  
+paru -S --noconfirm --repo cachyos-extra-v3 \
+  fish
+
+# Install from extra repo
+paru -S --noconfirm --repo extra \
   lapce zed
+
+# Install from AUR
+paru -S --noconfirm \
+  opencode-bin
 
 echo "Installation complete!"
 echo "Use 'cachyos-kernel-manager' for kernels and 'fish' as shell."
