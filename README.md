@@ -18,4 +18,4 @@ chmod +x install_cachyos.sh
 5. Configures hardware
 6. Cleans up
 
-That's it. Simple and stupid.
+That's it.
