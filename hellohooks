@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# CachyOS Hello Hooks Script
-# Manages cachyos-hello internal hooks
+# CachyOS Hello Script
+# Installs cachyos-hello with paru
 # Usage: ./hellohooks
 
 set -e
@@ -14,16 +14,12 @@ print_status() {
 }
 
 main() {
-    print_status "Installing CachyOS hello hooks..."
+    print_status "Installing cachyos-hello with paru..."
     
-    # Install cachyos-hooks package
-    if command -v paru &> /dev/null; then
-        paru -S --needed --noconfirm cachyos-hooks
-    else
-        sudo pacman -S --needed --noconfirm cachyos-hooks
-    fi
+    # Install cachyos-hello package
+    paru -S --needed --noconfirm cachyos-hello
     
-    print_status "CachyOS hello hooks installation complete!"
+    print_status "cachyos-hello installation complete!"
 }
 
 main "$@"
