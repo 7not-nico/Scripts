@@ -41,7 +41,7 @@ main() {
     paru -S --needed --noconfirm fish octopi dropbox brave-bin zen-browser-bin opencode-bin gemini-cli lapce zed cachyos-hello chwd
     
     print_status "Running hardware detection with chwd..."
-    sudo chwd -a
+    sudo chwd -a || true
     
     print_status "Launching cachyos-hello..."
     cachyos-hello

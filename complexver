@@ -109,7 +109,7 @@ fi
 echo "Installing chwd for hardware optimization..."
 paru -S --noconfirm --repo "$preferred_repo" chwd
 echo "Optimizing system..."
-sudo chwd -a /
+sudo chwd -a / || true
 
 # Install all packages from optimal repository
 echo "Installing packages from $preferred_repo..."
