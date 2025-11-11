@@ -332,7 +332,14 @@ install_packages() {
     local repo="$1"
     print_status "Installing packages from $repo..."
     
+    # Remove conflicting packages first
+    if pacman -Qi tldr &>/dev/null; then
+        print_status "Removing conflicting tldr package..."
+        sudo pacman -R --noconfirm tldr
+    fi
+    
     # CachyOS packages - use --needed to skip already installed packages
+    # Handle provider selections automatically
     paru -S --needed --noconfirm \
       cachyos-kernel-manager cachyos-hello cachyos-fish-config fish lapce zed octopi
     
