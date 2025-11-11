@@ -71,7 +71,7 @@ check_repo_conflicts() {
         esac
     done
     
-    # Check for conflicts
+    # Check for conflicts - any combination of different versions conflicts
     if ($has_v3 && $has_v4) || ($has_v3 && $has_znver4) || ($has_v4 && $has_znver4); then
         return 0  # Has conflicts
     fi
@@ -148,7 +148,7 @@ run_test() {
         print_status "SCENARIO 2: Optimal repository already configured"
         print_status "Action: Would keep as-is"
         
-    elif check_repo_conflicts "${existing_repos[@]}"; then
+    elif check_repo_conflicts "${existing_repos[@]}" || [[ "$preferred_repo" == "cachyos-v3" && " ${existing_repos[*]} " =~ " cachyos-v4 " ]] || [[ "$preferred_repo" == "cachyos-v4" && " ${existing_repos[*]} " =~ " cachyos-v3 " ]]; then
         # Scenario 4: Conflicting repos exist
         print_status "SCENARIO 4: Conflicting repositories detected"
         simulate_user_choice "$preferred_repo" "${existing_repos[@]}"
