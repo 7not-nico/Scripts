@@ -1,21 +1,28 @@
-# CachyOS Installation Script
+# CachyOS Scripts
 
-Simple script to install CachyOS with essential packages.
+Fast setup scripts for CachyOS Linux.
 
-## Usage
+## Scripts
+
+### `install_cachyos.sh`
+Full system installation with update-then-restart workflow.
+
+### `install_rate_mirrors.sh`
+Mirror optimization + package installation with repo priority.
+
+## Quick Start
 
 ```bash
-chmod +x install_cachyos.sh
+# Full installation
 ./install_cachyos.sh
+
+# Mirror setup only
+./install_rate_mirrors.sh
 ```
 
-## What it does
+## Features
 
-1. Updates system
-2. Installs paru (AUR helper)
-3. Sets up CachyOS repositories
-4. Installs essential packages
-5. Configures hardware
-6. Cleans up
-
-That's it.
+- Auto system updates
+- Repo priority: *v4 → *v3 → cachyos*
+- User fallback for missing packages
+- KISS principle - simple, direct, stupid
