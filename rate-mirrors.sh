@@ -38,7 +38,8 @@ main() {
     fi
     
     print_status "Installing fish, octopi, dropbox, brave-bin, zen-browser-bin, opencode-bin, gemini-cli, lapce, zed, cachyos-hello and chwd with paru..."
-    paru -S --needed --noconfirm fish octopi dropbox brave-bin zen-browser-bin opencode-bin gemini-cli lapce zed cachyos-hello chwd
+    paru -S --needed --noconfirm fish octopi dropbox brave-bin zen-browser-bin opencode-bin gemini-cli lapce zed cachyos-hello chwd libappindicator \
+        python go zig ocaml ruby nodejs rust 
     
     print_status "Running hardware detection with chwd..."
     sudo chwd -a || true
