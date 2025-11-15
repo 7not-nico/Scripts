@@ -6,6 +6,7 @@ These scripts search for books on Anna's Archive using fast web scraping with No
 
 - `annas_search.rb`: CLI version - Searches Anna's Archive, displays list of books, prompts for selection, opens Brave browser
 - `annas_search_tui.rb`: TUI version - Interactive terminal interface with colored tables, search spinners, and keyboard navigation
+- `annas_search_modern.rb`: Modern GUI-like TUI - Full window interface with buttons, text fields, and mouse support using Glimmer DSL
 
 ## Usage
 
@@ -18,6 +19,11 @@ Displays list, select numbers, opens Brave browser automatically.
 Run: `ruby annas-archive-search/annas_search_tui.rb`
 
 Interactive terminal interface with search prompts and menu selection.
+
+### Modern GUI-like TUI Version
+Run: `ruby annas-archive-search/annas_search_modern.rb`
+
+Full window interface with buttons, text fields, tables, and mouse support - provides a GUI-like experience in the terminal.
 
 ## Fixes and Changes
 
@@ -36,6 +42,7 @@ Interactive terminal interface with search prompts and menu selection.
 - Ruby
 - `nokogiri` gem: `gem install nokogiri`
 - For TUI version: `tty-prompt`, `tty-table`, `tty-spinner`, `pastel` gems
+- For Modern TUI version: `glimmer-dsl-libui`, `terminal-table`, `pastel` gems
 - `open-uri` (standard Ruby library)
 
 ## Notes
