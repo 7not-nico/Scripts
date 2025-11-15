@@ -30,13 +30,29 @@ end
 
 puts "Found books:"
 results.each_with_index do |result, i|
-  title_element = result.at_css('h3 a')
-  next unless title_element
-  title = title_element.text.strip
-  link = title_element['href']
-  puts "#{i + 1}. #{title}"
-  puts "   Link: https://annas-archive.org#{link}"
-  puts ""
+  link_element = result.at_css('a')
+  next unless link_element
+  link = link_element['href']
+  result_text = result.text.strip
+
+  # Extract title from result text lines
+  lines = result_text.split("\n").map(&:strip).reject(&:empty?)
+  title = lines[1] || lines[0] || "Unknown Title"
+
+  # Extract author from search link
+  author_element = result.css('a[href*="/search?q="]').first
+  author = if author_element
+             author_element.text.strip
+           else
+             "Unknown Author"
+           end
+
+  # Extract date from text
+  date_match = result_text.match(/(\w+ \d+, \d{4}|\d{4})/)
+  date = date_match ? date_match[1] : "Unknown Date"
+
+  # Format display
+  puts "#{i + 1}. \"#{title}\" by #{author} (#{date})"
 end
 
 if auto_selection
@@ -64,11 +80,18 @@ end
 
 selected_indices.each do |i|
   result = results[i]
-  title_element = result.at_css('h3 a')
-  next unless title_element
-  title = title_element.text.strip
-  link = title_element['href']
+  link_element = result.at_css('a')
+  next unless link_element
+  link = link_element['href']
+  result_text = result.text.strip
+  lines = result_text.split("\n").map(&:strip).reject(&:empty?)
+  title = lines[1] || lines[0] || "Unknown Title"
   book_url = "https://annas-archive.org#{link}"
 
-  puts "brave-browser --app='#{book_url}'"
+  puts "Opening Brave for: #{title}"
+  if system("brave-browser --app='#{book_url}' 2>/dev/null")
+    puts "Opened successfully."
+  else
+    puts "Failed to open Brave. Try: brave-browser --app='#{book_url}'"
+  end
 end
