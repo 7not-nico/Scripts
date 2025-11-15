@@ -6,6 +6,8 @@ require 'glimmer-dsl-libui'
 require 'terminal-table'
 require 'pastel'
 
+Book = Struct.new(:title, :author, :date, :url, :index)
+
 def extract_title(result)
   result_text = result.text.strip
   lines = result_text.split("\n").map(&:strip).reject(&:empty?)
@@ -39,7 +41,7 @@ def parse_results(doc)
     # Skip ads
     next if title == "Your ad here." || author.nil?
 
-    { title: title, author: author, date: date, url: url, index: i + 1 }
+    Book.new(title, author, date, url, i + 1)
   end.compact
 end
 
@@ -97,8 +99,14 @@ class AnnaSearchApp
   def open_selected_book
     return unless selected_book
 
-    self.status_message = "Opening #{selected_book[:title]}..."
-    open_browser(selected_book)
+    self.status_message = "Opening #{selected_book.title}..."
+    open_browser({
+      title: selected_book.title,
+      author: selected_book.author,
+      date: selected_book.date,
+      url: selected_book.url,
+      index: selected_book.index
+    })
     self.status_message = "Book opened successfully"
   end
 
@@ -133,10 +141,9 @@ class AnnaSearchApp
               text_column('Author')
               text_column('Date')
 
-              cell_rows <=> [self, :books,
-                column_attributes: ['title', 'author', 'date'],
-                column_count: 3
-              ]
+              cell_rows <= [self, :books, on_read: ->(books) {
+                books.map { |book| [book.title || 'Unknown Title', book.author || 'Unknown Author', book.date || 'Unknown Date'] }
+              }]
 
               on_selection_changed do |table, selection|
                 self.selected_book = books[selection] if selection >= 0
