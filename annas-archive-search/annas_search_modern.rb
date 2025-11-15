@@ -5,6 +5,7 @@ require 'open-uri'
 require 'glimmer-dsl-libui'
 require 'terminal-table'
 require 'pastel'
+require 'open3'
 
 Book = Struct.new(:title, :author, :date, :url, :index, :image_url,
                    :isbn, :publisher, :language, :file_format, :file_size)
@@ -261,6 +262,15 @@ class AnnaSearchApp
     system("open '#{selected_book.image_url}' 2>/dev/null &")
   end
 
+  def get_image_info(url)
+    return nil unless url
+    stdout, stderr, status = Open3.capture3("curl -s '#{url}' | identify -format '%wx%h %b' - 2>/dev/null | head -1")
+    return nil unless status.success?
+    stdout.strip
+  rescue
+    nil
+  end
+
   def update_selection_display
     if selected_book
       info = "#{selected_book.title} • #{selected_book.language} • #{selected_book.file_format}"
@@ -269,7 +279,12 @@ class AnnaSearchApp
 
       # Update cover preview
       if selected_book.image_url
-        @cover_display.text = "🖼️ Cover available\nClick 'View Cover' to display image"
+        image_info = get_image_info(selected_book.image_url)
+        if image_info
+          @cover_display.text = "🖼️ Cover: #{image_info}\nClick 'View Cover' to display image"
+        else
+          @cover_display.text = "🖼️ Cover available\nClick 'View Cover' to display image"
+        end
       else
         @cover_display.text = '❌ No cover available for this book'
       end
