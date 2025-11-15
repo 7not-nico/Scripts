@@ -34,3 +34,7 @@ awk -f cachyos-repo/install-repo.awk /etc/pacman.conf
 - Test script syntax with `bash -n`
 - Verify online execution with curl/bash pipes
 - Test package installation workflows
+
+## Common Errors and Fixes
+- **Ruby `gets` Error**: When `gets` fails with "No such file or directory" on arguments, change `gets` to `STDIN.gets` to read from stdin instead of ARGF (which treats args as files).
+- **Selector Outdated**: For web scraping, re-inspect site HTML and update CSS selectors if site changes (e.g., Anna's Archive torrent links).
