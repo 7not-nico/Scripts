@@ -62,6 +62,7 @@ selected_indices.each do |i|
   book_url = "https://annas-archive.org#{link}"
 
   begin
+    puts "Opening Brave for: #{title} at #{book_url}"
     system("brave '#{book_url}' 2>/dev/null")
     puts "Opened Brave for: #{title}"
   rescue => e
