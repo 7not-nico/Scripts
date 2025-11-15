@@ -46,7 +46,8 @@ bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/brave-mo
 
 ```bash
 # Search Anna's Archive
-./annas_archive_online.sh 'search term'
+./annas_archive_online.sh 'search term' [number]
+# Example: ./annas_archive_online.sh 'ruby' 1
 ```
 
 ## Quick Start
@@ -70,7 +71,7 @@ bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/brave-mo
 ```bash
 # Search Anna's Archive
 ruby annas-archive-search/annas_search.rb 'search term'
-# Or online: ./annas_archive_online.sh 'search term'
+# Or online: ./annas_archive_online.sh 'search term' [number]
 
 # Search PDFs
 ruby pdf-search/pdf_search.rb 'topic'  # Requires BRAVE_API_KEY
