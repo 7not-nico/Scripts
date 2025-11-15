@@ -47,7 +47,7 @@ bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/brave-mo
 ```bash
 # Search Anna's Archive
 bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/annas_archive_online.sh) 'search term' [number]
-# Example: bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/annas_archive_online.sh) 'ruby' 1
+
 ```
 
 ## Quick Start
