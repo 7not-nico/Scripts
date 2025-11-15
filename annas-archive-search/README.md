@@ -4,13 +4,13 @@ These scripts search for books on Anna's Archive using fast web scraping with No
 
 ## Script
 
-- `annas_search.rb`: Searches Anna's Archive, displays list of books, prompts for selection, prints `brave` command with URL for manual execution.
+- `annas_search.rb`: Searches Anna's Archive, displays list of books, prompts for selection, prints `brave-browser --app 'url'` command for manual execution.
 
 ## Usage
 
-Run: `ruby annas-archive-search/annas_search.rb 'search term'`
+Run: `ruby annas-archive-search/annas_search.rb 'search term' [number]`
 
-Displays list, select numbers, prints `brave 'url'` to copy and run manually.
+Displays list, select numbers, prints `brave-browser --app 'url'` to copy and run manually.
 
 ## Fixes and Changes
 

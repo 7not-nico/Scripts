@@ -20,13 +20,13 @@ CachyOS provides repositories with optimized packages for better performance. Th
 
 ```bash
 # Install CachyOS repo (auto-detects CPU)
-sudo ./cachyos-repo.sh --install
+sudo ./cachyos-repo/cachyos-repo.sh --install
 
 # Remove CachyOS repo
-sudo ./cachyos-repo.sh --remove
+sudo ./cachyos-repo/cachyos-repo.sh --remove
 
 # Show help
-./cachyos-repo.sh --help
+./cachyos-repo/cachyos-repo.sh --help
 ```
 
 ### Using AWK Scripts Directly

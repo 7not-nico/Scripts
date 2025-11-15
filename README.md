@@ -46,7 +46,7 @@ bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/brave-mo
 
 ```bash
 # Search Anna's Archive
-bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/annas_archive_online.sh)
+bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/annas_archive_online.sh) 'search term' [number]
 
 ```
 
@@ -70,17 +70,24 @@ bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/annas_ar
 ### Other Scripts
 ```bash
 # Search Anna's Archive
-ruby annas-archive-search/annas_search.rb 'search term'
+ruby annas-archive-search/annas_search.rb 'search term' [number]
 # Or online: bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/annas_archive_online.sh) 'search term' [number]
 
-# Search PDFs
-ruby pdf-search/pdf_search.rb 'topic'  # Requires BRAVE_API_KEY
+# Search and download all PDFs (requires BRAVE_API_KEY)
+ruby pdf-search/pdf_search.rb 'topic'
+
+# Search PDFs and select which to download (requires BRAVE_API_KEY)
+ruby pdf-search/pdf_selector.rb 'topic'
+
+# Search PDFs with Selenium (no API key needed)
+ruby pdf-search/brave_selenium_search.rb 'topic'
 
 # Modify Brave Local State (Ruby)
 ruby brave-script/modify_local_state.rb
 
-# Install CachyOS repo
-awk -f cachyos-repo/install-repo.awk /etc/pacman.conf
+# Install CachyOS repo (auto-detects CPU)
+sudo ./cachyos-repo/cachyos-repo.sh --install
+# Or manually: awk -f cachyos-repo/install-repo.awk /etc/pacman.conf
 ```
 
 ## Features
@@ -94,12 +101,12 @@ awk -f cachyos-repo/install-repo.awk /etc/pacman.conf
 
 Scripts for searching books on Anna's Archive.
 
-- `annas_search.rb`: Search and list books with title/author/date, open Brave webapp on selection
+- `annas_search.rb`: Search and list books with title/author/date, prints brave-browser command for manual execution
 - `annas_archive_online.sh`: Online runner for the search script
 
 Run locally: `ruby annas-archive-search/annas_search.rb 'search term' [number]`
 
-Displays formatted list (e.g., 1. "Title" by Author (Date)), selects number, opens Brave webapp.
+Displays formatted list (e.g., 1. "Title" by Author (Date)), selects number, prints `brave-browser --app 'url'` command.
 
 Run online: `./annas_archive_online.sh 'search term' [number]`
 
@@ -107,11 +114,11 @@ Run online: `./annas_archive_online.sh 'search term' [number]`
 
 Scripts for searching and downloading PDFs from the web using Brave Search API or Selenium.
 
-- `pdf_search.rb`: Auto-download all PDF results
-- `pdf_selector.rb`: Select which PDFs to download
+- `pdf_search.rb`: Auto-download all PDF results (requires Brave API key)
+- `pdf_selector.rb`: Select which PDFs to download (requires Brave API key)
 - `brave_selenium_search.rb`: Selenium-based search without API key
 
-Run: `ruby pdf-search/pdf_search.rb 'term'` (requires Brave API key)
+Run: `ruby pdf-search/pdf_search.rb 'term'` or `ruby pdf-search/pdf_selector.rb 'term'` (requires BRAVE_API_KEY), or `ruby pdf-search/brave_selenium_search.rb 'term'` (no key needed)
 
 ## Brave Browser Script
 
@@ -123,11 +130,12 @@ Run: `ruby brave-script/modify_local_state.rb`
 
 ## CachyOS Repository Management
 
-AWK scripts for managing CachyOS repositories.
+Scripts for managing CachyOS repositories.
 
-- `install-repo.awk`: Install standard CachyOS repo
-- `install-v4-repo.awk`: Install x86-64-v4 optimized repo
-- `install-znver4-repo.awk`: Install Zen4 optimized repo
-- `remove-repo.awk`: Remove CachyOS repo
+- `cachyos-repo.sh`: Main bash script to install/remove repos (auto-detects CPU)
+- `install-repo.awk`: AWK script to add standard CachyOS (x86-64-v3) repo
+- `install-v4-repo.awk`: AWK script to add x86-64-v4 optimized repo
+- `install-znver4-repo.awk`: AWK script to add Zen4 optimized repo
+- `remove-repo.awk`: AWK script to remove CachyOS repos
 
-Run: `awk -f cachyos-repo/install-repo.awk /etc/pacman.conf`
+Run: `sudo ./cachyos-repo/cachyos-repo.sh --install` (recommended) or `awk -f cachyos-repo/install-repo.awk /etc/pacman.conf`

@@ -27,8 +27,9 @@ This folder contains Ruby scripts for searching and downloading PDFs from the we
 
 ## Dependencies
 
-- API scripts: net/http, json, open-uri, fileutils (standard).
-- Selenium script: selenium-webdriver gem, geckodriver.
+- Ruby
+- For API scripts: net/http, json, open-uri, fileutils (standard Ruby libraries).
+- For Selenium script: `gem install selenium-webdriver`, and geckodriver (install via package manager or download from https://github.com/mozilla/geckodriver/releases).
 
 ## Notes
 
