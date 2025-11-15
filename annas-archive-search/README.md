@@ -2,26 +2,25 @@
 
 These scripts search for books on Anna's Archive using fast web scraping with Nokogiri.
 
-## Scripts
+## Script
 
-- `annas_search.rb`: Displays list of books, opens browser for selected books.
-- `annas_direct_search.rb`: Displays list of books, opens browser for selected books.
+- `annas_search.rb`: Searches Anna's Archive, displays list of books, prompts for selection, prints `brave` command with URL for manual execution.
 
 ## Usage
 
-Run: `ruby annas-archive-search/annas_search.rb 'search term'` or `ruby annas-archive-search/annas_direct_search.rb 'search term'`
+Run: `ruby annas-archive-search/annas_search.rb 'search term'`
 
-Both display a list, prompt for selection, and print the `brave` command with the book's URL for manual execution.
+Displays list, select numbers, prints `brave 'url'` to copy and run manually.
 
 ## Fixes and Changes
 
 - **Scraping Setup**: Used Nokogiri for fast static HTML parsing (no Selenium/browser).
-- **Selector Errors**: Inspected Anna's Archive HTML to get correct CSS selectors (e.g., `.flex.pt-3.pb-3` for results, `a[href*="/dyn/small_file/torrents/"]` for downloads).
-- **Format Extraction**: Added regex to parse book format from page text (e.g., "Format: PDF") for filename extension; defaults to 'unknown' if not found.
+- **Selector Errors**: Inspected Anna's Archive HTML to get correct CSS selectors (e.g., `.flex.pt-3.pb-3` for results, `h3 a` for titles/links).
+- **Title Extraction**: Improved to get clean book titles from `h3 a` elements.
 - **Error Handling**: Added rescues for network failures, missing elements; skips invalid results.
-- **Segmentation**: Created separate scripts for torrent vs. direct downloads to keep minimal.
-- **Filename Sanitization**: Applied KISS principle with simple regex for clean filenames.
 - **Input Reading Fix**: Changed `gets` to `STDIN.gets` to avoid ARGF reading from command-line arguments as files, ensuring interactive input works correctly.
+- **Browser Opening**: Initially tried system calls, but switched to printing `brave` command for manual execution to avoid GUI issues.
+- **KISS Principle**: Consolidated to single script, removed redundancies.
 
 ## Dependencies
 
