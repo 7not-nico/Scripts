@@ -244,86 +244,95 @@ class AnnaSearchApp
     self.status_message = "🖼️ Book cover opened"
   end
 
+  def open_book_image_auto
+    return unless selected_book && selected_book.image_url
+
+    # Open silently in background
+    system("brave --app='#{selected_book.image_url}' 2>/dev/null &") ||
+    system("xdg-open '#{selected_book.image_url}' 2>/dev/null &") ||
+    system("open '#{selected_book.image_url}' 2>/dev/null &")
+  end
+
   def truncate_text(text, max_length)
     return text if text.nil? || text.length <= max_length
     text[0..max_length-3] + "..."
   end
 
   def launch
-    window('📚 Anna\'s Archive', 800, 600) {
+    window('📚 Anna\'s Archive', 750, 550) {
       margined true
 
       vertical_box {
-        # Header
-        horizontal_box {
-          label('🔍 Anna\'s Archive') { stretchy true }
-          label("#{search_count}🔎") { stretchy false }
-        }
-
-        # Search bar
-        horizontal_box {
-          entry {
-            text <=> [self, :search_query]
-            stretchy true
-          }
-          button('Search') {
-            on_clicked { search_books(search_query) }
-          }
-          button('Clear') {
-            on_clicked {
-              self.search_query = ""
-              self.books = []
-              self.selected_book = nil
-              self.status_message = "Cleared"
+        # Search section
+        group('Search') {
+          vertical_box {
+            horizontal_box {
+              entry {
+                text <=> [self, :search_query]
+                stretchy true
+              }
+              button('🔍 Search') {
+                on_clicked { search_books(search_query) }
+              }
+              button('🗑️ Clear') {
+                on_clicked {
+                  self.search_query = ""
+                  self.books = []
+                  self.selected_book = nil
+                  self.status_message = "Ready"
+                }
+              }
             }
           }
         }
 
-        # Results table - simplified
-        table {
-          text_column('Title')
-          text_column('Author')
-          text_column('Date')
-          text_column('Lang')
-          text_column('Format')
+        # Results table
+        group('Books') {
+          table {
+            text_column('Title')
+            text_column('Author')
+            text_column('Year')
+            text_column('Lang')
+            text_column('Format')
 
-          cell_rows <= [self, :books, on_read: ->(books) {
-            books.map { |book| [
-              truncate_text(book.title || 'Unknown', 30),
-              truncate_text(book.author || 'Unknown', 20),
-              book.date || 'Unknown',
-              (book.language || 'UNK')[0..2],  # Short language code
-              book.file_format || 'UNK'
-            ]}
-          }]
+            cell_rows <= [self, :books, on_read: ->(books) {
+              books.map { |book| [
+                truncate_text(book.title || 'Unknown', 25),
+                truncate_text(book.author || 'Unknown', 18),
+                book.date || 'Unknown',
+                (book.language || 'UNK')[0..2],
+                book.file_format || 'UNK'
+              ]}
+            }]
 
-          on_selection_changed do |table, selection|
-            self.selected_book = books[selection] if selection >= 0
-            if selected_book
-              info = "#{selected_book.title} • #{selected_book.language} • #{selected_book.file_format}"
-              info += " • #{selected_book.file_size}" if selected_book.file_size
-              self.status_message = info
+            on_selection_changed do |table, selection|
+              self.selected_book = books[selection] if selection >= 0
+              if selected_book
+                info = "#{selected_book.title} • #{selected_book.language} • #{selected_book.file_format}"
+                info += " • #{selected_book.file_size}" if selected_book.file_size
+                self.status_message = info
+
+                # Auto-open cover image if available
+                if selected_book.image_url
+                  open_book_image_auto
+                end
+              end
             end
-          end
-
-          stretchy true
+          }
         }
 
         # Action buttons
         horizontal_box {
-          button('📖 Open') {
+          button('📖 Open Book') {
             enabled <= [self, :selected_book, on_read: ->(book) { !book.nil? }]
             on_clicked { open_selected_book }
           }
-          button('🖼️ Cover') {
-            enabled <= [self, :selected_book, on_read: ->(book) { book&.image_url }]
-            on_clicked { open_book_image }
-          }
-          button('📊 Stats') {
+          button('📊 Statistics') {
             on_clicked {
               count = books.size
               authors = books.map(&:author).compact.uniq.size
-              self.status_message = "#{count} books from #{authors} authors"
+              languages = books.map(&:language).compact.uniq.size
+              self.status_message = "#{count} books • #{authors} authors • #{languages} languages"
             }
           }
           button('❌ Quit') {
