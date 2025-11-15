@@ -102,7 +102,7 @@ selected_indices.each do |i|
   book_url = "https://annas-archive.org#{link}"
 
   puts "Opening Brave for: #{title}"
-  if system("brave-browser --app='#{book_url}' 2>/dev/null")
+  if system("brave --app='#{book_url}' 2>/dev/null")
     puts "Opened successfully."
   else
     puts "Failed to open Brave. Try: brave-browser --app='#{book_url}'"
