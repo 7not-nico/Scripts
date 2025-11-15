@@ -6,7 +6,7 @@ require 'glimmer-dsl-libui'
 require 'terminal-table'
 require 'pastel'
 
-Book = Struct.new(:title, :author, :date, :url, :index)
+Book = Struct.new(:title, :author, :date, :url, :index, :image_url)
 
 def extract_title(result)
   result_text = result.text.strip
@@ -30,6 +30,18 @@ def extract_url(result)
   link_element ? "https://annas-archive.org#{link_element['href']}" : nil
 end
 
+def extract_image_url(result)
+  # Look for book cover images in the result
+  img_element = result.at_css('img')
+  if img_element && img_element['src']
+    src = img_element['src']
+    # Convert relative URLs to absolute
+    src.start_with?('http') ? src : "https://annas-archive.org#{src}"
+  else
+    nil
+  end
+end
+
 def parse_results(doc)
   results = doc.css('.flex.pt-3.pb-3')
   results.each_with_index.map do |result, i|
@@ -37,11 +49,12 @@ def parse_results(doc)
     author = extract_author(result)
     date = extract_date(result)
     url = extract_url(result)
+    image_url = extract_image_url(result)
 
     # Skip ads
     next if title == "Your ad here." || author.nil?
 
-    Book.new(title, author, date, url, i + 1)
+    Book.new(title, author, date, url, i + 1, image_url)
   end.compact
 end
 
@@ -122,113 +135,95 @@ class AnnaSearchApp
     end
   end
 
+  def open_book_image
+    return unless selected_book && selected_book.image_url
+
+    self.status_message = "🖼️ Opening book cover..."
+    system("brave --app='#{selected_book.image_url}' 2>/dev/null") ||
+    system("xdg-open '#{selected_book.image_url}' 2>/dev/null") ||
+    system("open '#{selected_book.image_url}' 2>/dev/null")
+
+    self.status_message = "🖼️ Book cover opened"
+  end
+
   def launch
-    window('📚 Anna\'s Archive - Modern TUI', 900, 700) {
+    window('📚 Anna\'s Archive', 700, 500) {
       margined true
 
       vertical_box {
-        # Header section
+        # Compact header
         horizontal_box {
-          label('🔍') {
-            stretchy false
-          }
-          label('Anna\'s Archive Book Search') {
+          label('🔍') { stretchy false }
+          label('Book Search') { stretchy true }
+          label("#{search_count}🔎") { stretchy false }
+        }
+
+        # Compact search bar
+        horizontal_box {
+          entry {
+            text <=> [self, :search_query]
             stretchy true
           }
-          label("Searches: #{search_count}") {
-            stretchy false
+          button('Search') {
+            on_clicked { search_books(search_query) }
           }
-        }
-
-        # Search section
-        group('🔎 Search Books') {
-          margined true
-          vertical_box {
-            horizontal_box {
-              entry {
-                text <=> [self, :search_query]
-                stretchy true
-              }
-
-              button('🔍 Search') {
-                on_clicked do
-                  search_books(search_query)
-                end
-              }
-
-              button('🗑️ Clear') {
-                on_clicked do
-                  self.search_query = ""
-                  self.books = []
-                  self.selected_book = nil
-                  self.status_message = "🧹 Cleared search and results"
-                end
-              }
+          button('Clear') {
+            on_clicked {
+              self.search_query = ""
+              self.books = []
+              self.selected_book = nil
+              self.status_message = "Cleared"
             }
           }
         }
 
-        # Results section
-        group('📚 Search Results') {
-          margined true
-          vertical_box {
-            table {
-              text_column('📖 Title')
-              text_column('👤 Author')
-              text_column('📅 Date')
+        # Results table - more compact
+        table {
+          text_column('Title')
+          text_column('Author')
+          text_column('Date')
+          text_column('Cover')
 
-              cell_rows <= [self, :books, on_read: ->(books) {
-                books.map { |book| [
-                  book.title || '❓ Unknown Title',
-                  book.author || '❓ Unknown Author',
-                  book.date || '❓ Unknown Date'
-                ]}
-              }]
+          cell_rows <= [self, :books, on_read: ->(books) {
+            books.map { |book| [
+              book.title || 'Unknown',
+              book.author || 'Unknown',
+              book.date || 'Unknown',
+              book.image_url ? '🖼️' : '❌'
+            ]}
+          }]
 
-              on_selection_changed do |table, selection|
-                self.selected_book = books[selection] if selection >= 0
-                if selected_book
-                  self.status_message = "📋 Selected: #{selected_book.title} by #{selected_book.author}"
-                end
-              end
-            }
-          }
+          on_selection_changed do |table, selection|
+            self.selected_book = books[selection] if selection >= 0
+          end
+
+          stretchy true
         }
 
-        # Action buttons
+        # Compact action bar
         horizontal_box {
-          button('🌐 Open Book') {
+          button('📖 Open') {
             enabled <= [self, :selected_book, on_read: ->(book) { !book.nil? }]
-            on_clicked do
-              open_selected_book
-            end
+            on_clicked { open_selected_book }
           }
-
-          button('📊 Statistics') {
-            on_clicked do
-              book_count = books.size
-              author_count = books.map(&:author).compact.uniq.size
-              self.status_message = "📊 #{book_count} books from #{author_count} authors"
-            end
+          button('🖼️ Cover') {
+            enabled <= [self, :selected_book, on_read: ->(book) { book&.image_url }]
+            on_clicked { open_book_image }
           }
-
-          button('❌ Quit') {
-            on_clicked do
-              exit(0)
-            end
-          }
-        }
-
-        # Status bar with better styling
-        group('📢 Status') {
-          margined true
-          vertical_box {
-            label {
-              text <=> [self, :status_message]
-              stretchy true
+          button('📊 Stats') {
+            on_clicked {
+              count = books.size
+              authors = books.map(&:author).compact.uniq.size
+              self.status_message = "#{count} books, #{authors} authors"
             }
           }
+          button('❌ Quit') {
+            on_clicked { exit(0) }
+          }
         }
+
+        # Status label
+        label { text <=> [self, :status_message] }
       }
     }.show
   end
