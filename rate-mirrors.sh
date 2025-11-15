@@ -28,7 +28,7 @@ main() {
         print_status "Skipping mirror rating - already done recently"
     else
         print_status "Installing cachyos-rate-mirrors..."
-        sudo pacman -S --needed --noconfirm cachyos-rate-mirrors
+        sudo pacman -S --needed --noconfirm cachyos-rate-mirrors paru-bin
         
         print_status "Running cachyos-rate-mirrors..."
         sudo cachyos-rate-mirrors
@@ -38,8 +38,7 @@ main() {
     fi
     
     print_status "Installing fish, octopi, dropbox, brave-bin, zen-browser-bin, opencode-bin, gemini-cli, lapce, zed, cachyos-hello and chwd with paru..."
-    paru -S --needed --noconfirm fish octopi dropbox brave-bin zen-browser-bin opencode-bin gemini-cli lapce zed cachyos-hello chwd libappindicator \
-        yazi python go zig ocaml ruby nodejs rust dotnet-sdk-bin 
+    paru -S --needed --noconfirm fish octopi dropbox brave-bin zen-browser-bin opencode-bin gemini-cli lapce zed cachyos-hello chwd libappindicator cachyos-kernel-manager yazi python go zig ocaml ruby nodejs rust dotnet-sdk-bin 
     
     print_status "Running hardware detection with chwd..."
     sudo chwd -a || true
