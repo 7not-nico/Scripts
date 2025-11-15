@@ -42,17 +42,30 @@ results.each_with_index do |result, i|
   # Extract author from search link
   author_element = result.css('a[href*="/search?q="]').first
   author = if author_element
-             author_element.text.strip
+             raw_author = author_element.text.strip
+             # Deduplicate repeated names
+             parts = raw_author.split(/[,;&]/).map(&:strip).uniq
+             parts.join(', ')
            else
              "Unknown Author"
            end
 
-  # Extract date from text
-  date_match = result_text.match(/(\w+ \d+, \d{4}|\d{4})/)
-  date = date_match ? date_match[1] : "Unknown Date"
+  # Extract date from text with validation
+  full_date_match = result_text.match(/(\w+ \d{1,2}, \d{4})/)
+  if full_date_match
+    date = full_date_match[1]
+  else
+    year_match = result_text.match(/\b(19[0-9]{2}|20[0-2][0-9])\b/)
+    date = year_match ? year_match[1] : "Unknown Date"
+  end
 
-  # Format display
-  puts "#{i + 1}. \"#{title}\" by #{author} (#{date})"
+  # Skip ads
+  next if title == "Your ad here." || author == "Unknown Author"
+
+  # Format display with truncation
+  truncated_title = title.length > 50 ? title[0..47] + "..." : title
+  truncated_author = author.length > 30 ? author[0..27] + "..." : author
+  puts "#{i + 1}. \"#{truncated_title}\" by #{truncated_author} (#{date})"
 end
 
 if auto_selection
