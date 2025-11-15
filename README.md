@@ -44,6 +44,11 @@ bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/rate-mir
 bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/brave-modify.sh)
 ```
 
+```bash
+# Search Anna's Archive
+./annas_archive_online.sh 'search term'
+```
+
 ## Quick Start
 
 ### CachyOS Setup
@@ -64,7 +69,8 @@ bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/brave-mo
 ### Other Scripts
 ```bash
 # Search Anna's Archive
-ruby annas-archive-search/annas_search.rb 'book title'
+ruby annas-archive-search/annas_search.rb 'search term'
+# Or online: ./annas_archive_online.sh 'search term'
 
 # Search PDFs
 ruby pdf-search/pdf_search.rb 'topic'  # Requires BRAVE_API_KEY
