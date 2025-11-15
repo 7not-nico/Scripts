@@ -62,8 +62,8 @@ selected_indices.each do |i|
   book_url = "https://annas-archive.org#{link}"
 
   begin
-    system("xdg-open '#{book_url}' 2>/dev/null")
-    puts "Opened browser for: #{title}"
+    system("brave '#{book_url}' 2>/dev/null")
+    puts "Opened Brave for: #{title}"
   rescue => e
     puts "Failed to open Brave for #{title}: #{e.message}"
   end

@@ -11,7 +11,7 @@ These scripts search for books on Anna's Archive using fast web scraping with No
 
 Run: `ruby annas-archive-search/annas_search.rb 'search term'` or `ruby annas-archive-search/annas_direct_search.rb 'search term'`
 
-Both display a list, prompt for selection, and open default browser to the book's page for manual download.
+Both display a list, prompt for selection, and open Brave browser to the book's page for manual download.
 
 ## Fixes and Changes
 
