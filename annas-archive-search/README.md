@@ -2,15 +2,22 @@
 
 These scripts search for books on Anna's Archive using fast web scraping with Nokogiri.
 
-## Script
+## Scripts
 
-- `annas_search.rb`: Searches Anna's Archive, displays list of books, prompts for selection, prints `brave` command with URL for manual execution.
+- `annas_search.rb`: CLI version - Searches Anna's Archive, displays list of books, prompts for selection, opens Brave browser
+- `annas_search_tui.rb`: TUI version - Interactive terminal interface with colored tables, search spinners, and keyboard navigation
 
 ## Usage
 
-Run: `ruby annas-archive-search/annas_search.rb 'search term'`
+### CLI Version
+Run: `ruby annas-archive-search/annas_search.rb 'search term' [selection]`
 
-Displays list, select numbers, prints `brave 'url'` to copy and run manually.
+Displays list, select numbers, opens Brave browser automatically.
+
+### TUI Version
+Run: `ruby annas-archive-search/annas_search_tui.rb`
+
+Interactive terminal interface with search prompts and menu selection.
 
 ## Fixes and Changes
 
@@ -28,12 +35,14 @@ Displays list, select numbers, prints `brave 'url'` to copy and run manually.
 
 - Ruby
 - `nokogiri` gem: `gem install nokogiri`
-- `open-uri` and `fileutils` (standard Ruby libraries)
+- For TUI version: `tty-prompt`, `tty-table`, `tty-spinner`, `pastel` gems
+- `open-uri` (standard Ruby library)
 
 ## Notes
 
 - No API key needed.
-- Prints `brave-browser --app 'url'` for manual execution in webapp mode.
+- CLI version opens Brave browser automatically.
+- TUI version provides interactive experience with colors and tables.
 - Fast search with Nokogiri.
 - Handles first page of results only.
-- Optional selection arg for automation.
+- CLI supports optional selection arg for automation.
