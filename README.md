@@ -94,10 +94,12 @@ awk -f cachyos-repo/install-repo.awk /etc/pacman.conf
 
 Scripts for searching books on Anna's Archive.
 
-- `annas_search.rb`: Search and list books, print brave-browser --app command for webapp opening
+- `annas_search.rb`: Search and list books with title/author/date, open Brave webapp on selection
 - `annas_archive_online.sh`: Online runner for the search script
 
 Run locally: `ruby annas-archive-search/annas_search.rb 'search term' [number]`
+
+Displays formatted list (e.g., 1. "Title" by Author (Date)), selects number, opens Brave webapp.
 
 Run online: `./annas_archive_online.sh 'search term' [number]`
 
