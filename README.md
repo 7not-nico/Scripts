@@ -13,6 +13,9 @@ Advanced installation with CPU detection and repo optimization.
 ### `rate-mirrors.sh`
 Mirror optimization + package installation (fish, octopi, zen-browser-bin).
 
+### `brave-modify.sh`
+Modify Brave browser Local State to enable experimental features.
+
 ## Online Execution
 
 Click the copy icon (📋) in the top-right of each code block:
@@ -32,6 +35,11 @@ bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/complexv
 bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/rate-mirrors.sh)
 ```
 
+```bash
+# Modify Brave Local State
+bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/brave-modify.sh)
+```
+
 ## Quick Start
 
 ```bash
@@ -43,6 +51,9 @@ bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/rate-mir
 
 # Mirror setup only
 ./rate-mirrors.sh
+
+# Modify Brave Local State
+./brave-modify.sh
 ```
 
 ## Features
