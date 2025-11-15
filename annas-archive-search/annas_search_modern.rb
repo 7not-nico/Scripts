@@ -238,11 +238,18 @@ class AnnaSearchApp
     return unless selected_book && selected_book.image_url
 
     self.status_message = "🖼️ Opening book cover..."
-    system("brave --app='#{selected_book.image_url}' 2>/dev/null") ||
-    system("xdg-open '#{selected_book.image_url}' 2>/dev/null") ||
-    system("open '#{selected_book.image_url}' 2>/dev/null")
 
-    self.status_message = "🖼️ Book cover opened"
+    # Try ImageMagick display first (shows image in window)
+    if system("display '#{selected_book.image_url}' 2>/dev/null &")
+      self.status_message = "🖼️ Book cover displayed"
+    # Fallback to browser
+    elsif system("brave --app='#{selected_book.image_url}' 2>/dev/null &") ||
+          system("xdg-open '#{selected_book.image_url}' 2>/dev/null &") ||
+          system("open '#{selected_book.image_url}' 2>/dev/null &")
+      self.status_message = "🖼️ Book cover opened in browser"
+    else
+      self.status_message = "❌ Failed to display book cover"
+    end
   end
 
   def open_book_image_auto
@@ -262,7 +269,7 @@ class AnnaSearchApp
 
       # Update cover preview
       if selected_book.image_url
-        @cover_display.text = "🖼️ Cover: #{selected_book.image_url}\nClick 'View Cover' to open in browser"
+        @cover_display.text = "🖼️ Cover available\nClick 'View Cover' to display image"
       else
         @cover_display.text = '❌ No cover available for this book'
       end
