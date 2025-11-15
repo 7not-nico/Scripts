@@ -14,7 +14,7 @@ Advanced installation with CPU detection and repo optimization.
 Mirror optimization + package installation (fish, octopi, zen-browser-bin).
 
 ### `brave-modify.sh`
-Modify Brave browser Local State to enable experimental features.
+Modify Brave browser Local State to enable experimental features and launch browser.
 
 ## Online Execution
 
