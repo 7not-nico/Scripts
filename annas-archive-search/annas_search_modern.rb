@@ -6,7 +6,8 @@ require 'glimmer-dsl-libui'
 require 'terminal-table'
 require 'pastel'
 
-Book = Struct.new(:title, :author, :date, :url, :index, :image_url)
+Book = Struct.new(:title, :author, :date, :url, :index, :image_url,
+                   :isbn, :publisher, :language, :file_format, :file_size)
 
 def extract_title(result)
   result_text = result.text.strip
@@ -42,6 +43,96 @@ def extract_image_url(result)
   end
 end
 
+def extract_isbn(result)
+  text = result.text
+  # Look for ISBN patterns
+  isbn_patterns = [
+    /ISBN[-\s]?(\d{13})/i,
+    /ISBN[-\s]?(\d{10})/i,
+    /(\d{13})/,  # 13-digit numbers that might be ISBN
+    /(\d{10})/   # 10-digit numbers that might be ISBN
+  ]
+
+  isbn_patterns.each do |pattern|
+    match = text.match(pattern)
+    return match[1] if match
+  end
+  nil
+end
+
+def extract_publisher(result)
+  text = result.text
+  # Look for publisher patterns
+  publisher_patterns = [
+    /Published by ([^\n,]+)/i,
+    /Publisher: ([^\n,]+)/i,
+    /Imprint: ([^\n,]+)/i
+  ]
+
+  publisher_patterns.each do |pattern|
+    match = text.match(pattern)
+    return match[1].strip if match
+  end
+  nil
+end
+
+def extract_language(result)
+  text = result.text
+  # Look for language indicators
+  lang_patterns = {
+    'English' => /english|en|us|uk/i,
+    'Spanish' => /spanish|español|es/i,
+    'French' => /french|français|fr/i,
+    'German' => /german|deutsch|de/i,
+    'Italian' => /italian|italiano|it/i,
+    'Portuguese' => /portuguese|português|pt/i,
+    'Chinese' => /chinese|中文|zh/i,
+    'Japanese' => /japanese|日本語|ja/i,
+    'Russian' => /russian|русский|ru/i
+  }
+
+  lang_patterns.each do |lang, pattern|
+    return lang if text.match(pattern)
+  end
+  'Unknown'
+end
+
+def extract_file_format(result)
+  text = result.text
+  # Look for format indicators
+  format_patterns = [
+    /PDF/i,
+    /EPUB/i,
+    /MOBI/i,
+    /AZW/i,
+    /DJVU/i,
+    /TXT/i,
+    /RTF/i
+  ]
+
+  format_patterns.each do |pattern|
+    return pattern.source.gsub('/i', '') if text.match(pattern)
+  end
+  'Unknown'
+end
+
+def extract_file_size(result)
+  text = result.text
+  # Look for size information
+  size_patterns = [
+    /(\d+(?:\.\d+)?)\s*(?:MB|GB|KB)/i,
+    /Size:\s*(\d+(?:\.\d+)?)/i,
+    /(\d+(?:\.\d+)?)\s*MB/i,
+    /(\d+(?:\.\d+)?)\s*GB/i
+  ]
+
+  size_patterns.each do |pattern|
+    match = text.match(pattern)
+    return match[0] if match
+  end
+  nil
+end
+
 def parse_results(doc)
   results = doc.css('.flex.pt-3.pb-3')
   results.each_with_index.map do |result, i|
@@ -50,11 +141,17 @@ def parse_results(doc)
     date = extract_date(result)
     url = extract_url(result)
     image_url = extract_image_url(result)
+    isbn = extract_isbn(result)
+    publisher = extract_publisher(result)
+    language = extract_language(result)
+    file_format = extract_file_format(result)
+    file_size = extract_file_size(result)
 
     # Skip ads
     next if title == "Your ad here." || author.nil?
 
-    Book.new(title, author, date, url, i + 1, image_url)
+    Book.new(title, author, date, url, i + 1, image_url,
+             isbn, publisher, language, file_format, file_size)
   end.compact
 end
 
@@ -177,30 +274,59 @@ class AnnaSearchApp
           }
         }
 
-        # Results table - more compact
+        # Results table with rich metadata
         table {
           text_column('Title')
           text_column('Author')
-          text_column('Date')
+          text_column('Lang')
+          text_column('Format')
+          text_column('Size')
           text_column('Cover')
 
           cell_rows <= [self, :books, on_read: ->(books) {
             books.map { |book| [
               book.title || 'Unknown',
               book.author || 'Unknown',
-              book.date || 'Unknown',
+              book.language || 'UNK',
+              book.file_format || 'UNK',
+              book.file_size || '-',
               book.image_url ? '🖼️' : '❌'
             ]}
           }]
 
           on_selection_changed do |table, selection|
             self.selected_book = books[selection] if selection >= 0
+            if selected_book
+              # Update status bar
+              metadata = []
+              metadata << "ISBN: #{selected_book.isbn}" if selected_book.isbn
+              metadata << "Publisher: #{selected_book.publisher}" if selected_book.publisher
+              metadata << "#{selected_book.language} • #{selected_book.file_format}"
+              metadata << selected_book.file_size if selected_book.file_size
+              self.status_message = metadata.join(' • ') unless metadata.empty?
+
+              # Update details panel
+              details = []
+              details << "📖 #{selected_book.title}"
+              details << "👤 #{selected_book.author}" if selected_book.author
+              details << "📅 #{selected_book.date}" if selected_book.date
+              details << "🌍 #{selected_book.language}" if selected_book.language != 'Unknown'
+              details << "📄 #{selected_book.file_format}" if selected_book.file_format != 'Unknown'
+              details << "📏 #{selected_book.file_size}" if selected_book.file_size
+              details << "🏢 #{selected_book.publisher}" if selected_book.publisher
+              details << "📚 #{selected_book.isbn}" if selected_book.isbn
+              details << "🖼️ Cover available" if selected_book.image_url
+
+              @details_label.text = details.join("\n") unless details.empty?
+            else
+              @details_label.text = 'Select a book to see details'
+            end
           end
 
           stretchy true
         }
 
-        # Compact action bar
+        # Action bar with filters
         horizontal_box {
           button('📖 Open') {
             enabled <= [self, :selected_book, on_read: ->(book) { !book.nil? }]
@@ -210,15 +336,37 @@ class AnnaSearchApp
             enabled <= [self, :selected_book, on_read: ->(book) { book&.image_url }]
             on_clicked { open_book_image }
           }
+          button('🌍 EN') {
+            on_clicked {
+              english_books = books.select { |b| b.language == 'English' }
+              self.status_message = "Filtered to #{english_books.size} English books"
+              # Note: In a full implementation, this would update the displayed table
+            }
+          }
+          button('📄 PDF') {
+            on_clicked {
+              pdf_books = books.select { |b| b.file_format == 'PDF' }
+              self.status_message = "Filtered to #{pdf_books.size} PDF books"
+            }
+          }
           button('📊 Stats') {
             on_clicked {
               count = books.size
               authors = books.map(&:author).compact.uniq.size
-              self.status_message = "#{count} books, #{authors} authors"
+              languages = books.map(&:language).compact.uniq.size
+              formats = books.map(&:file_format).compact.uniq.size
+              self.status_message = "#{count} books • #{authors} authors • #{languages} languages • #{formats} formats"
             }
           }
           button('❌ Quit') {
             on_clicked { exit(0) }
+          }
+        }
+
+        # Metadata details for selected book
+        group('Book Details') {
+          vertical_box {
+            @details_label = label { text 'Select a book to see details' }
           }
         }
 
