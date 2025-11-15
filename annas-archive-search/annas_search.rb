@@ -2,7 +2,69 @@
 
 require 'nokogiri'
 require 'open-uri'
-require 'fileutils'
+
+def extract_title(result)
+  result_text = result.text.strip
+  lines = result_text.split("\n").map(&:strip).reject(&:empty?)
+  lines[1] || lines[0]
+end
+
+def extract_author(result)
+  author_element = result.css('a[href*="/search?q="]').first
+  author_element&.text&.strip
+end
+
+def extract_date(result)
+  result_text = result.text.strip
+  date_match = result_text.match(/(\w+ \d{1,2}, \d{4}|\b(19[0-9]{2}|20[0-2][0-9])\b)/)
+  date_match ? date_match[1] || date_match[2] : nil
+end
+
+def extract_url(result)
+  link_element = result.at_css('a')
+  link_element ? "https://annas-archive.org#{link_element['href']}" : nil
+end
+
+def parse_results(doc)
+  results = doc.css('.flex.pt-3.pb-3')
+  results.each_with_index.map do |result, i|
+    title = extract_title(result)
+    author = extract_author(result)
+    date = extract_date(result)
+    url = extract_url(result)
+
+    # Skip ads
+    next if title == "Your ad here." || author.nil?
+
+    { title: title, author: author, date: date, url: url, index: i + 1 }
+  end.compact
+end
+
+def display_books(books)
+  puts "Found books:"
+  books.each do |book|
+    truncated_title = book[:title] && book[:title].length > 50 ? book[:title][0..47] + "..." : book[:title]
+    truncated_author = book[:author] && book[:author].length > 30 ? book[:author][0..27] + "..." : book[:author]
+    date = book[:date] || "Unknown Date"
+    puts "#{book[:index]}. \"#{truncated_title}\" by #{truncated_author} (#{date})"
+  end
+end
+
+def parse_selection(input, book_count)
+  return (0...book_count).to_a if input.downcase == 'all'
+
+  input.split(',').map(&:strip).map(&:to_i).map { |n| n - 1 }.select { |n| n >= 0 && n < book_count }
+end
+
+def open_browser(book)
+  puts "Opening Brave for: #{book[:title]}"
+  url = book[:url]
+  if system("brave --app='#{url}' 2>/dev/null")
+    puts "Opened successfully."
+  else
+    puts "Failed to open Brave. Try: brave-browser --app='#{url}'"
+  end
+end
 
 if ARGV.empty?
   puts "Usage: ruby annas_search.rb 'search string' [selection]"
@@ -21,52 +83,14 @@ rescue => e
   exit 1
 end
 
-results = doc.css('.flex.pt-3.pb-3')
+books = parse_results(doc)
 
-if results.empty?
+if books.empty?
   puts "No books found."
   exit 0
 end
 
-puts "Found books:"
-results.each_with_index do |result, i|
-  link_element = result.at_css('a')
-  next unless link_element
-  link = link_element['href']
-  result_text = result.text.strip
-
-  # Extract title from result text lines
-  lines = result_text.split("\n").map(&:strip).reject(&:empty?)
-  title = lines[1] || lines[0] || "Unknown Title"
-
-  # Extract author from search link
-  author_element = result.css('a[href*="/search?q="]').first
-  author = if author_element
-             raw_author = author_element.text.strip
-             # Deduplicate repeated names
-             parts = raw_author.split(/[,;&]/).map(&:strip).uniq
-             parts.join(', ')
-           else
-             "Unknown Author"
-           end
-
-  # Extract date from text with validation
-  full_date_match = result_text.match(/(\w+ \d{1,2}, \d{4})/)
-  if full_date_match
-    date = full_date_match[1]
-  else
-    year_match = result_text.match(/\b(19[0-9]{2}|20[0-2][0-9])\b/)
-    date = year_match ? year_match[1] : "Unknown Date"
-  end
-
-  # Skip ads
-  next if title == "Your ad here." || author == "Unknown Author"
-
-  # Format display with truncation
-  truncated_title = title.length > 50 ? title[0..47] + "..." : title
-  truncated_author = author.length > 30 ? author[0..27] + "..." : author
-  puts "#{i + 1}. \"#{truncated_title}\" by #{truncated_author} (#{date})"
-end
+display_books(books)
 
 if auto_selection
   input = auto_selection
@@ -80,11 +104,7 @@ else
   input = input.chomp.strip
 end
 
-selected_indices = if input.downcase == 'all'
-                     (0...results.size).to_a
-                   else
-                     input.split(',').map(&:strip).map(&:to_i).map { |n| n - 1 }.select { |n| n >= 0 && n < results.size }
-                   end
+selected_indices = parse_selection(input, books.size)
 
 if selected_indices.empty?
   puts "No valid selections. Exiting."
@@ -92,19 +112,6 @@ if selected_indices.empty?
 end
 
 selected_indices.each do |i|
-  result = results[i]
-  link_element = result.at_css('a')
-  next unless link_element
-  link = link_element['href']
-  result_text = result.text.strip
-  lines = result_text.split("\n").map(&:strip).reject(&:empty?)
-  title = lines[1] || lines[0] || "Unknown Title"
-  book_url = "https://annas-archive.org#{link}"
-
-  puts "Opening Brave for: #{title}"
-  if system("brave --app='#{book_url}' 2>/dev/null")
-    puts "Opened successfully."
-  else
-    puts "Failed to open Brave. Try: brave-browser --app='#{book_url}'"
-  end
+  book = books[i]
+  open_browser(book)
 end
