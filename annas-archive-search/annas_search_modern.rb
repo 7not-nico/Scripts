@@ -135,6 +135,7 @@ end
 
 def parse_results(doc)
   results = doc.css('.flex.pt-3.pb-3')
+
   results.each_with_index.map do |result, i|
     title = extract_title(result)
     author = extract_author(result)
@@ -243,19 +244,23 @@ class AnnaSearchApp
     self.status_message = "🖼️ Book cover opened"
   end
 
+  def truncate_text(text, max_length)
+    return text if text.nil? || text.length <= max_length
+    text[0..max_length-3] + "..."
+  end
+
   def launch
-    window('📚 Anna\'s Archive', 700, 500) {
+    window('📚 Anna\'s Archive', 800, 600) {
       margined true
 
       vertical_box {
-        # Compact header
+        # Header
         horizontal_box {
-          label('🔍') { stretchy false }
-          label('Book Search') { stretchy true }
+          label('🔍 Anna\'s Archive') { stretchy true }
           label("#{search_count}🔎") { stretchy false }
         }
 
-        # Compact search bar
+        # Search bar
         horizontal_box {
           entry {
             text <=> [self, :search_query]
@@ -274,59 +279,37 @@ class AnnaSearchApp
           }
         }
 
-        # Results table with rich metadata
+        # Results table - simplified
         table {
           text_column('Title')
           text_column('Author')
+          text_column('Date')
           text_column('Lang')
           text_column('Format')
-          text_column('Size')
-          text_column('Cover')
 
           cell_rows <= [self, :books, on_read: ->(books) {
             books.map { |book| [
-              book.title || 'Unknown',
-              book.author || 'Unknown',
-              book.language || 'UNK',
-              book.file_format || 'UNK',
-              book.file_size || '-',
-              book.image_url ? '🖼️' : '❌'
+              truncate_text(book.title || 'Unknown', 30),
+              truncate_text(book.author || 'Unknown', 20),
+              book.date || 'Unknown',
+              (book.language || 'UNK')[0..2],  # Short language code
+              book.file_format || 'UNK'
             ]}
           }]
 
           on_selection_changed do |table, selection|
             self.selected_book = books[selection] if selection >= 0
             if selected_book
-              # Update status bar
-              metadata = []
-              metadata << "ISBN: #{selected_book.isbn}" if selected_book.isbn
-              metadata << "Publisher: #{selected_book.publisher}" if selected_book.publisher
-              metadata << "#{selected_book.language} • #{selected_book.file_format}"
-              metadata << selected_book.file_size if selected_book.file_size
-              self.status_message = metadata.join(' • ') unless metadata.empty?
-
-              # Update details panel
-              details = []
-              details << "📖 #{selected_book.title}"
-              details << "👤 #{selected_book.author}" if selected_book.author
-              details << "📅 #{selected_book.date}" if selected_book.date
-              details << "🌍 #{selected_book.language}" if selected_book.language != 'Unknown'
-              details << "📄 #{selected_book.file_format}" if selected_book.file_format != 'Unknown'
-              details << "📏 #{selected_book.file_size}" if selected_book.file_size
-              details << "🏢 #{selected_book.publisher}" if selected_book.publisher
-              details << "📚 #{selected_book.isbn}" if selected_book.isbn
-              details << "🖼️ Cover available" if selected_book.image_url
-
-              @details_label.text = details.join("\n") unless details.empty?
-            else
-              @details_label.text = 'Select a book to see details'
+              info = "#{selected_book.title} • #{selected_book.language} • #{selected_book.file_format}"
+              info += " • #{selected_book.file_size}" if selected_book.file_size
+              self.status_message = info
             end
           end
 
           stretchy true
         }
 
-        # Action bar with filters
+        # Action buttons
         horizontal_box {
           button('📖 Open') {
             enabled <= [self, :selected_book, on_read: ->(book) { !book.nil? }]
@@ -336,26 +319,11 @@ class AnnaSearchApp
             enabled <= [self, :selected_book, on_read: ->(book) { book&.image_url }]
             on_clicked { open_book_image }
           }
-          button('🌍 EN') {
-            on_clicked {
-              english_books = books.select { |b| b.language == 'English' }
-              self.status_message = "Filtered to #{english_books.size} English books"
-              # Note: In a full implementation, this would update the displayed table
-            }
-          }
-          button('📄 PDF') {
-            on_clicked {
-              pdf_books = books.select { |b| b.file_format == 'PDF' }
-              self.status_message = "Filtered to #{pdf_books.size} PDF books"
-            }
-          }
           button('📊 Stats') {
             on_clicked {
               count = books.size
               authors = books.map(&:author).compact.uniq.size
-              languages = books.map(&:language).compact.uniq.size
-              formats = books.map(&:file_format).compact.uniq.size
-              self.status_message = "#{count} books • #{authors} authors • #{languages} languages • #{formats} formats"
+              self.status_message = "#{count} books from #{authors} authors"
             }
           }
           button('❌ Quit') {
@@ -363,14 +331,7 @@ class AnnaSearchApp
           }
         }
 
-        # Metadata details for selected book
-        group('Book Details') {
-          vertical_box {
-            @details_label = label { text 'Select a book to see details' }
-          }
-        }
-
-        # Status label
+        # Status bar
         label { text <=> [self, :status_message] }
       }
     }.show
