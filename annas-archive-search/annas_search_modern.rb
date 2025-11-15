@@ -186,6 +186,7 @@ class AnnaSearchApp
     @status_message = "🔍 Ready to search for books"
     @is_searching = false
     @search_count = 0
+    @last_cover_open = Time.now
   end
 
   def search_books(query)
@@ -253,12 +254,31 @@ class AnnaSearchApp
     system("open '#{selected_book.image_url}' 2>/dev/null &")
   end
 
+  def update_selection_display
+    if selected_book
+      info = "#{selected_book.title} • #{selected_book.language} • #{selected_book.file_format}"
+      info += " • #{selected_book.file_size}" if selected_book.file_size
+      self.status_message = info
+
+      # Update cover preview
+      if selected_book.image_url
+        @cover_display.text = "🖼️ Cover: #{selected_book.image_url}\nClick 'View Cover' to open in browser"
+      else
+        @cover_display.text = '❌ No cover available for this book'
+      end
+    else
+      @cover_display.text = 'Select a book to preview cover'
+    end
+  end
+
   def truncate_text(text, max_length)
     return text if text.nil? || text.length <= max_length
     text[0..max_length-3] + "..."
   end
 
   def launch
+    @current_selection = -1
+
     window('📚 Anna\'s Archive', 750, 550) {
       margined true
 
@@ -286,7 +306,7 @@ class AnnaSearchApp
           }
         }
 
-        # Results table
+        # Results table with hover selection
         group('Books') {
           table {
             text_column('Title')
@@ -305,18 +325,12 @@ class AnnaSearchApp
               ]}
             }]
 
-            on_selection_changed do |table, selection|
-              self.selected_book = books[selection] if selection >= 0
-              if selected_book
-                info = "#{selected_book.title} • #{selected_book.language} • #{selected_book.file_format}"
-                info += " • #{selected_book.file_size}" if selected_book.file_size
-                self.status_message = info
+            # Table with enhanced selection feedback
 
-                # Auto-open cover image if available
-                if selected_book.image_url
-                  open_book_image_auto
-                end
-              end
+            on_selection_changed do |table, selection|
+              @current_selection = selection
+              self.selected_book = books[selection] if selection >= 0
+              update_selection_display
             end
           }
         }
@@ -326,6 +340,10 @@ class AnnaSearchApp
           button('📖 Open Book') {
             enabled <= [self, :selected_book, on_read: ->(book) { !book.nil? }]
             on_clicked { open_selected_book }
+          }
+          button('🖼️ View Cover') {
+            enabled <= [self, :selected_book, on_read: ->(book) { book&.image_url }]
+            on_clicked { open_book_image }
           }
           button('📊 Statistics') {
             on_clicked {
@@ -337,6 +355,13 @@ class AnnaSearchApp
           }
           button('❌ Quit') {
             on_clicked { exit(0) }
+          }
+        }
+
+        # Cover preview area
+        group('Cover Preview') {
+          vertical_box {
+            @cover_display = label { text 'Select a book to preview cover' }
           }
         }
 
