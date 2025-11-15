@@ -61,12 +61,7 @@ selected_indices.each do |i|
   link = title_element['href']
   book_url = "https://annas-archive.org#{link}"
 
-  puts "Opening Brave for: #{title} at #{book_url}"
-  if system("brave '#{book_url}' 2>/dev/null")
-    puts "Opened Brave for: #{title}"
-  else
-    puts "Failed to open Brave for #{title}: command failed"
-  end
+  puts "brave '#{book_url}'"
     filename = title.downcase.gsub(/[^a-z0-9]+/, '_').gsub(/^_|_$/, '') + ".#{format}"
     filepath = File.join('output', filename)
     
