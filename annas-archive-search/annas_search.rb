@@ -64,5 +64,5 @@ selected_indices.each do |i|
   link = title_element['href']
   book_url = "https://annas-archive.org#{link}"
 
-  puts "brave '#{book_url}'"
+  puts "brave-browser '#{book_url}'"
 end
