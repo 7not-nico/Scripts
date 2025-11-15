@@ -5,11 +5,13 @@ require 'open-uri'
 require 'fileutils'
 
 if ARGV.empty?
-  puts "Usage: ruby annas_search.rb 'search string'"
+  puts "Usage: ruby annas_search.rb 'search string' [selection]"
+  puts "If selection is provided, automatically selects that number."
   exit 1
 end
 
 search_string = ARGV[0]
+auto_selection = ARGV[1]
 url = "https://annas-archive.org/search?q=#{URI.encode_www_form_component(search_string)}"
 
 begin
@@ -37,13 +39,17 @@ results.each_with_index do |result, i|
   puts ""
 end
 
-puts "Enter numbers to download (comma-separated, e.g., 1,3,5 or 'all'):"
-input = STDIN.gets
-if input.nil?
-  puts "No input provided. Exiting."
-  exit 0
+if auto_selection
+  input = auto_selection
+else
+  puts "Enter numbers to download (comma-separated, e.g., 1,3,5 or 'all'):"
+  input = STDIN.gets
+  if input.nil?
+    puts "No input provided. Exiting."
+    exit 0
+  end
+  input = input.chomp.strip
 end
-input = input.chomp.strip
 
 selected_indices = if input.downcase == 'all'
                      (0...results.size).to_a

@@ -17,11 +17,7 @@ temp_script=$(mktemp)
 curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/annas-archive-search/annas_search.rb > "$temp_script"
 
 # Run with ruby
-if [ -n "$selection" ]; then
-  echo "$selection" | ruby "$temp_script" "$search_term"
-else
-  ruby "$temp_script" "$search_term"
-fi
+ruby "$temp_script" "$search_term" "$selection"
 
 # Clean up
 rm "$temp_script"

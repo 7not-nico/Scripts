@@ -97,7 +97,7 @@ Scripts for searching books on Anna's Archive.
 - `annas_search.rb`: Search and list books, print brave-browser --app command for webapp opening
 - `annas_archive_online.sh`: Online runner for the search script
 
-Run locally: `ruby annas-archive-search/annas_search.rb 'search term'`
+Run locally: `ruby annas-archive-search/annas_search.rb 'search term' [number]`
 
 Run online: `./annas_archive_online.sh 'search term' [number]`
 
