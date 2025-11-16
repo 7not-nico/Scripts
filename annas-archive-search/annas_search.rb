@@ -2,6 +2,7 @@
 
 require 'nokogiri'
 require 'open-uri'
+require 'json'
 
 def truncate(str, max_len)
   str && str.length > max_len ? str[0..max_len-1] + "..." : str
@@ -87,14 +88,25 @@ search_string = ARGV[0]
 auto_selection = ARGV[1]
 url = "https://annas-archive.org/search?q=#{URI.encode_www_form_component(search_string)}"
 
-begin
-  doc = Nokogiri::HTML(URI.open(url))
-rescue => e
-  puts "Failed to fetch search page: #{e.message}"
-  exit 1
-end
+cache_file = ".annas_cache_#{search_string.hash}.json"
+cache_ttl = 3600
 
-books = parse_results(doc)
+if File.exist?(cache_file) && (Time.now - File.mtime(cache_file)) < cache_ttl
+  cached_data = JSON.parse(File.read(cache_file))
+  books = cached_data['books'].map { |b| b.transform_keys(&:to_sym) }
+else
+  begin
+    doc = Nokogiri::HTML(URI.open(url))
+  rescue => e
+    puts "Failed to fetch search page: #{e.message}"
+    exit 1
+  end
+
+  books = parse_results(doc)
+
+  cache_data = { 'books' => books.map { |b| b.transform_keys(&:to_s) }, 'timestamp' => Time.now.to_i }
+  File.write(cache_file, JSON.generate(cache_data))
+end
 
 if books.empty?
   puts "No books found."
