@@ -4,7 +4,7 @@ These scripts search for books on Anna's Archive using fast web scraping with No
 
 ## Script
 
-- `annas_search.rb`: Searches Anna's Archive, displays list of books, prompts for selection, prints `brave-browser --app 'url'` command for manual execution.
+- `annas_search.rb`: Searches Anna's Archive, displays list of books with titles, authors, dates, and filetypes (e.g., PDF, EPUB), prompts for selection, prints `brave-browser --app 'url'` command for manual execution.
 
 ## Usage
 
@@ -23,6 +23,8 @@ Displays list, select numbers, prints `brave-browser --app 'url'` to copy and ru
 - **Command Correction**: Used `brave-browser` for correct terminal invocation, added `--app` for webapp mode.
 - **Automation**: Added optional selection argument for non-interactive usage (e.g., `ruby annas_search.rb 'term' 1`).
 - **KISS Principle**: Consolidated to single script, removed redundancies, kept simple and functional.
+- **Book Type Display**: Added extraction of book filetype (e.g., PDF, EPUB) from search results using regex pattern `/ · ([A-Z]{3,4}) · /` on result text. Displays filetype in brackets after date if available, e.g., "(2004) [PDF]". Avoids showing for missing types to prevent redundancy.
+- **Code Refactoring**: Introduced `truncate` helper function to eliminate duplication in title/author truncation. Optimized extraction functions to compute `result.text.strip` once per result and pass to text-based extractors, reducing redundant operations.
 
 ## Dependencies
 

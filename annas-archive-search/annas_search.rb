@@ -3,8 +3,11 @@
 require 'nokogiri'
 require 'open-uri'
 
-def extract_title(result)
-  result_text = result.text.strip
+def truncate(str, max_len)
+  str && str.length > max_len ? str[0..max_len-1] + "..." : str
+end
+
+def extract_title(result_text)
   lines = result_text.split("\n").map(&:strip).reject(&:empty?)
   lines[1] || lines[0]
 end
@@ -14,8 +17,7 @@ def extract_author(result)
   author_element&.text&.strip
 end
 
-def extract_date(result)
-  result_text = result.text.strip
+def extract_date(result_text)
   date_match = result_text.match(/(\w+ \d{1,2}, \d{4}|\b(19[0-9]{2}|20[0-2][0-9])\b)/)
   date_match ? date_match[1] || date_match[2] : nil
 end
@@ -25,28 +27,37 @@ def extract_url(result)
   link_element ? "https://annas-archive.org#{link_element['href']}" : nil
 end
 
+def extract_filetype(result_text)
+  match = result_text.match(/ · ([A-Z]{3,4}) · /)
+  match ? match[1] : nil
+end
+
 def parse_results(doc)
   results = doc.css('.flex.pt-3.pb-3')
   results.each_with_index.map do |result, i|
-    title = extract_title(result)
+    result_text = result.text.strip
+    title = extract_title(result_text)
     author = extract_author(result)
-    date = extract_date(result)
+    date = extract_date(result_text)
     url = extract_url(result)
+    filetype = extract_filetype(result_text)
 
     # Skip ads
     next if title == "Your ad here." || author.nil?
 
-    { title: title, author: author, date: date, url: url, index: i + 1 }
+    { title: title, author: author, date: date, url: url, index: i + 1, filetype: filetype }
   end.compact
 end
 
 def display_books(books)
   puts "Found books:"
   books.each do |book|
-    truncated_title = book[:title] && book[:title].length > 50 ? book[:title][0..47] + "..." : book[:title]
-    truncated_author = book[:author] && book[:author].length > 30 ? book[:author][0..27] + "..." : book[:author]
+    truncated_title = truncate(book[:title], 50)
+    truncated_author = truncate(book[:author], 30)
     date = book[:date] || "Unknown Date"
-    puts "#{book[:index]}. \"#{truncated_title}\" by #{truncated_author} (#{date})"
+    date_str = "(#{date})"
+    date_str += " [#{book[:filetype]}]" if book[:filetype]
+    puts "#{book[:index]}. \"#{truncated_title}\" by #{truncated_author} #{date_str}"
   end
 end
 
