@@ -56,8 +56,8 @@ def display_books(books)
     truncated_author = truncate(book[:author], 30)
     date = book[:date] || "Unknown Date"
     date_str = "(#{date})"
-    date_str += " [#{book[:filetype]}]" if book[:filetype]
-    puts "#{book[:index]}. \"#{truncated_title}\" by #{truncated_author} #{date_str}"
+    filetype_prefix = book[:filetype] ? "[#{book[:filetype]}] " : ""
+    puts "#{filetype_prefix}#{book[:index]}. \"#{truncated_title}\" by #{truncated_author} #{date_str}"
   end
 end
 
