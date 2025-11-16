@@ -26,6 +26,7 @@ Displays list, select numbers, prints `brave-browser --app 'url'` to copy and ru
 - **Book Type Display**: Added extraction of book filetype (e.g., PDF, EPUB) from search results using regex pattern `/ · ([A-Z]{3,4}) · /` on result text. Displays filetype in brackets after date if available, e.g., "(2004) [PDF]". Avoids showing for missing types to prevent redundancy.
 - **Code Refactoring**: Introduced `truncate` helper function to eliminate duplication in title/author truncation. Optimized extraction functions to compute `result.text.strip` once per result and pass to text-based extractors, reducing redundant operations.
 - **Display Reordering**: Moved book filetype display from after date to before index and title for better visibility, e.g., [PDF] 1. "Title" by Author (Date). Only shows when available to avoid redundancy.
+- **Performance Optimizations**: Added file-based caching for search results (1-hour TTL, query-specific) to eliminate network latency for repeated searches. Reduced redundant text operations in parsing. Maintains KISS principle with simple JSON cache storage.
 
 ## Dependencies
 
