@@ -56,7 +56,7 @@ Select numbers to open books in Brave browser webapp mode automatically.
 ## Technical Implementation
 
 ### Modular Architecture
-- **Separation of Concerns**: Code organized into focused classes (`Config`, `Cache`, `Network`, `Parser`, `Display`, `Browser`, `Input`, `Errors`) in `lib/` directory
+- **Separation of Concerns**: Code organized into focused classes (`Config`, `Cache`, `Network`, `Parser`, `BookBuilder`, `Display`, `Browser`, `Input`, `Errors`) in `lib/` directory
 - **Clean Code**: Encapsulated methods, parameter passing instead of globals, reduced redundancies
 - **KISS Principle**: Simple class methods, minimal dependencies, straightforward logic
 
