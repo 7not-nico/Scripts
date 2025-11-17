@@ -45,6 +45,7 @@ Select numbers to open books in Brave browser webapp mode automatically.
 ### Smart Display
 - **Filetype Detection**: Automatic extraction of file formats (PDF, EPUB, etc.)
 - **Formatted Output**: Clean, readable display with filetype indicators
+- **Color Coding**: Colorized filetypes, bold titles, highlighted authors for better CLI readability
 - **Truncation**: Smart title and author truncation for terminal display
 
 ### Automation Support
@@ -96,6 +97,7 @@ Select numbers to open books in Brave browser webapp mode automatically.
 ### Required
 - **Ruby 2.7+**: Core runtime environment
 - **nokogiri gem**: `gem install nokogiri` for HTML parsing
+- **colorize gem**: `gem install colorize` for CLI color output
 
 ### Standard Libraries
 - **open-uri**: URL handling (included with Ruby)
@@ -105,11 +107,8 @@ Select numbers to open books in Brave browser webapp mode automatically.
 ## Installation
 
 ```bash
-# Install nokogiri
-gem install nokogiri
-
-# Make script executable (optional)
-chmod +x annas-archive-search/annas_search.rb
+# Install required gems
+gem install nokogiri colorize
 ```
 
 ## Configuration
