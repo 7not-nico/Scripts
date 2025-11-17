@@ -33,7 +33,8 @@ module Config
 
   BROWSERS = {
     fallbacks: ['brave --app', 'firefox --new-window', 'chromium --app'],
-    cmd: ENV['BROWSER_COMMAND']
+    cmd: ENV['BROWSER_COMMAND'],
+    available: []
   }
 
   PARSING = {
@@ -54,6 +55,7 @@ OPEN_TIMEOUT = Config::NETWORK[:open_timeout]
 READ_TIMEOUT = Config::NETWORK[:read_timeout]
 BROWSER_FALLBACKS = Config::BROWSERS[:fallbacks]
 BROWSER_CMD = Config::BROWSERS[:cmd] || BROWSER_FALLBACKS.first
+AVAILABLE_BROWSERS = Config::BROWSERS[:available]
 BASE_URL = Config::NETWORK[:base_url]
 RESULT_SELECTOR = Config::PARSING[:result_selector]
 AUTHOR_SELECTOR = Config::PARSING[:author_selector]
