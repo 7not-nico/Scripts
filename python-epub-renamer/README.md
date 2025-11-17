@@ -1,35 +1,50 @@
 # Python Epub Renamer
 
-A simple, fast, and KISS-compliant epub file renamer that formats files as `title - author.epub`.
+Lightweight, fast, and KISS-compliant EPUB file renamer written in Python, using only the standard library for maximum portability.
+
+## Overview
+
+This Python script provides reliable EPUB file renaming by parsing the EPUB's metadata. It formats files as `title - author.epub` with intelligent fallbacks for missing metadata and cross-platform filesystem compatibility.
 
 ## Features
 
-- **Performant**: Fast execution using Python standard library only
-- **KISS-Compliant**: Single file, minimal dependencies, clear code
-- **No Redundancies**: Single purpose, efficient implementation
-- **Cross-platform**: Works on Linux, macOS, Windows
-- **Curl-executable**: Run directly from GitHub URLs
+- **High Performance**: Fast execution with minimal resource usage
+- **Zero Dependencies**: Uses only Python standard library
+- **KISS Principle**: Single file, clear code, focused functionality
+- **Cross-Platform**: Works on Linux, macOS, Windows
+- **Curl-Executable**: Direct execution from GitHub URLs
+- **Intelligent Fallbacks**: Handles missing metadata gracefully
 
 ## Usage
 
-### Direct execution
+### Direct Execution
 ```bash
+# Single file
 python3 epub_renamer.py book.epub
-```
 
-### Via curl (recommended)
-```bash
-curl -L https://raw.githubusercontent.com/user/repo/main/epub_renamer.py | python3 - book.epub
-```
-
-### Multiple files
-```bash
+# Multiple files
 python3 epub_renamer.py book1.epub book2.epub book3.epub
+
+# All EPUB files in directory
+python3 epub_renamer.py *.epub
 ```
 
-### Dry run (preview changes)
+### Via Curl (Recommended)
 ```bash
+# Direct execution from GitHub
+curl -L https://raw.githubusercontent.com/7not-nico/Scripts/main/python-epub-renamer/epub_renamer.py | python3 - book.epub
+```
+
+### Advanced Options
+```bash
+# Dry run (preview changes without renaming)
 python3 epub_renamer.py --dry-run *.epub
+
+# Verbose output
+python3 epub_renamer.py --verbose book.epub
+
+# Help
+python3 epub_renamer.py --help
 ```
 
 ## Requirements

@@ -4,108 +4,94 @@ require 'nokogiri'
 require 'open-uri'
 require 'json'
 
-def truncate(str, max_len)
-  str && str.length > max_len ? str[0..max_len-1] + "..." : str
+# Constants
+CACHE_TTL = 3600  # 1 hour
+TITLE_MAX_LEN = 50
+AUTHOR_MAX_LEN = 30
+
+def truncate(str, len)
+  str.length > len ? "#{str[0...len]}..." : str
 end
 
-def extract_title(result_text)
-  lines = result_text.split("\n").map(&:strip).reject(&:empty?)
-  lines[1] || lines[0]
-end
+# Utility functions
+def truncate_title(str) = truncate(str, TITLE_MAX_LEN)
+def truncate_author(str) = truncate(str, AUTHOR_MAX_LEN)
 
-def extract_author(result)
-  author_element = result.css('a[href*="/search?q="]').first
-  author_element&.text&.strip
-end
+def parse_book(result, index)
+  text = result.text.strip
+  return nil if text.include?("Your ad here.")
 
-def extract_date(result_text)
-  date_match = result_text.match(/(\w+ \d{1,2}, \d{4}|\b(19[0-9]{2}|20[0-2][0-9])\b)/)
-  date_match ? date_match[1] || date_match[2] : nil
-end
+  # Extract all data in single pass
+  lines = text.split("\n").map(&:strip).reject(&:empty?)
+  title = lines[1] || lines[0]
 
-def extract_url(result)
-  link_element = result.at_css('a')
-  link_element ? "https://annas-archive.org#{link_element['href']}" : nil
-end
+  author_link = result.at_css('a[href*="/search?q="]')
+  author = author_link&.text&.strip
+  return nil unless author
 
-def extract_filetype(result_text)
-  match = result_text.match(/ · ([A-Z]{3,4}) · /)
-  match ? match[1] : nil
-end
+  # Single regex pass for date and filetype
+  date_match = text.match(/\b(19[0-9]{2}|20[0-2][0-9])\b/)
+  filetype_match = text.match(/ · ([A-Z]{3,4}) · /)
 
-def parse_results(doc)
-  results = doc.css('.flex.pt-3.pb-3')
-  results.each_with_index.map do |result, i|
-    result_text = result.text.strip
-    title = extract_title(result_text)
-    author = extract_author(result)
-    date = extract_date(result_text)
-    url = extract_url(result)
-    filetype = extract_filetype(result_text)
+  book_link = result.at_css('a')
+  url = book_link ? "https://annas-archive.org#{book_link['href']}" : nil
 
-    # Skip ads
-    next if title == "Your ad here." || author.nil?
-
-    { title: title, author: author, date: date, url: url, index: i + 1, filetype: filetype }
-  end.compact
+  {
+    title: title,
+    author: author,
+    date: date_match ? date_match[0] : nil,
+    url: url,
+    index: index + 1,
+    filetype: filetype_match ? filetype_match[1] : nil
+  }
 end
 
 def display_books(books)
   puts "Found books:"
   books.each do |book|
-    truncated_title = truncate(book[:title], 50)
-    truncated_author = truncate(book[:author], 30)
     date = book[:date] || "Unknown Date"
-    date_str = "(#{date})"
-    filetype_prefix = book[:filetype] ? "[#{book[:filetype]}] " : ""
-    puts "#{filetype_prefix}#{book[:index]}. \"#{truncated_title}\" by #{truncated_author} #{date_str}"
+    prefix = book[:filetype] ? "[#{book[:filetype]}] " : ""
+    puts "#{prefix}#{book[:index]}. \"#{truncate_title(book[:title])}\" by #{truncate_author(book[:author])} (#{date})"
   end
 end
 
-def parse_selection(input, book_count)
-  return (0...book_count).to_a if input.downcase == 'all'
-
-  input.split(',').map(&:strip).map(&:to_i).map { |n| n - 1 }.select { |n| n >= 0 && n < book_count }
+def parse_selection(input, count)
+  return (0...count).to_a if input.downcase == 'all'
+  input.split(',').map { |n| n.strip.to_i - 1 }.select { |n| n.between?(0, count - 1) }
 end
 
 def open_browser(book)
-  puts "Opening Brave for: #{book[:title]}"
-  url = book[:url]
-  if system("brave --app='#{url}' 2>/dev/null")
-    puts "Opened successfully."
-  else
-    puts "Failed to open Brave. Try: brave-browser --app='#{url}'"
-  end
+  system("brave --app '#{book[:url]}'") if book[:url]
 end
 
+# Main execution
 if ARGV.empty?
   puts "Usage: ruby annas_search.rb 'search string' [selection]"
-  puts "If selection is provided, automatically selects that number."
   exit 1
 end
 
-search_string = ARGV[0]
-auto_selection = ARGV[1]
-url = "https://annas-archive.org/search?q=#{URI.encode_www_form_component(search_string)}"
+search = ARGV[0]
+selection = ARGV[1]
+url = "https://annas-archive.org/search?q=#{URI.encode_www_form_component(search)}"
+cache_file = ".annas_cache_#{search.hash}"
 
-cache_file = ".annas_cache_#{search_string.hash}.json"
-cache_ttl = 3600
-
-if File.exist?(cache_file) && (Time.now - File.mtime(cache_file)) < cache_ttl
-  cached_data = JSON.parse(File.read(cache_file))
-  books = cached_data['books'].map { |b| b.transform_keys(&:to_sym) }
-else
+books = if File.exist?(cache_file) && (Time.now - File.mtime(cache_file)) < CACHE_TTL
   begin
-    doc = Nokogiri::HTML(URI.open(url))
+    JSON.parse(File.read(cache_file), symbolize_names: true)
+  rescue JSON::ParserError
+    nil
+  end
+end
+
+unless books
+  begin
+    doc = Nokogiri::HTML(URI.open(url, open_timeout: 10, read_timeout: 30))
+    books = doc.css('.flex.pt-3.pb-3').each_with_index.filter_map { |r, i| parse_book(r, i) }
+    File.write(cache_file, JSON.generate(books)) if books.size > 0
   rescue => e
-    puts "Failed to fetch search page: #{e.message}"
+    puts "Failed to fetch: #{e.message}"
     exit 1
   end
-
-  books = parse_results(doc)
-
-  cache_data = { 'books' => books.map { |b| b.transform_keys(&:to_s) }, 'timestamp' => Time.now.to_i }
-  File.write(cache_file, JSON.generate(cache_data))
 end
 
 if books.empty?
@@ -115,26 +101,8 @@ end
 
 display_books(books)
 
-if auto_selection
-  input = auto_selection
-else
-  puts "Enter numbers to download (comma-separated, e.g., 1,3,5 or 'all'):"
-  input = STDIN.gets
-  if input.nil?
-    puts "No input provided. Exiting."
-    exit 0
-  end
-  input = input.chomp.strip
-end
+input = selection || (puts("Enter numbers (comma-separated or 'all'):"); STDIN.gets&.chomp&.strip || '')
+exit 0 if input.empty?
 
-selected_indices = parse_selection(input, books.size)
-
-if selected_indices.empty?
-  puts "No valid selections. Exiting."
-  exit 0
-end
-
-selected_indices.each do |i|
-  book = books[i]
-  open_browser(book)
-end
+selections = parse_selection(input, books.size)
+selections.each { |i| open_browser(books[i]) } if selections.any?

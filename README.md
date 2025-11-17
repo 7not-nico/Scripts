@@ -1,24 +1,26 @@
 # Scripts Collection
 
-A collection of useful scripts for various tasks, including CachyOS setup, web scraping, PDF searching, and browser modifications.
+A comprehensive collection of useful scripts for system administration, web scraping, file management, and browser automation. All scripts follow the KISS principle - simple, direct, and minimal complexity.
+
+## Project Structure
+
+- **CachyOS Scripts** - System installation and repository management
+- **Web Scraping** - Anna's Archive search, PDF downloading
+- **Browser Tools** - Brave browser modification and automation
+- **File Utilities** - EPUB renaming (Go, Python implementations)
+- **Download Tools** - Project Gutenberg multi-language downloader
+- **Desktop Apps** - Anna's Archive desktop application (Tauri)
 
 ## CachyOS Scripts
 
-Fast setup scripts for CachyOS Linux.
+Fast setup scripts for CachyOS Linux with automatic optimization.
 
 ### Scripts
 
-### `install_cachyos.sh`
-Simple system installation with update-then-restart workflow.
-
-### `complexver`
-Advanced installation with CPU detection and repo optimization.
-
-### `rate-mirrors.sh`
-Mirror optimization + package installation (fish, octopi, zen-browser-bin).
-
-### `brave-modify.sh`
-Modify Brave browser Local State to enable experimental features and launch browser.
+- **`install_cachyos.sh`** - Simple system installation with update-then-restart workflow
+- **`complexver`** - Advanced installation with CPU detection and repo optimization
+- **`rate-mirrors.sh`** - Mirror optimization + package installation (fish, octopi, zen-browser-bin)
+- **`brave-modify.sh`** - Modify Brave browser Local State to enable experimental features
 
 ## Online Execution
 
@@ -99,43 +101,128 @@ sudo ./cachyos-repo/cachyos-repo.sh --install
 
 ## Anna's Archive Search
 
-Scripts for searching books on Anna's Archive.
+Fast web scraping scripts for searching books on Anna's Archive with caching and performance optimizations.
 
-- `annas_search.rb`: Search and list books with title/author/date, prints brave-browser command for manual execution
-- `annas_archive_online.sh`: Online runner for the search script
+- **`annas_search.rb`**: Search with cached results, filetype display, and automated browser launching
+- **`annas_archive_online.sh`**: Online runner for the search script
+
+Features:
+- File-based caching (1-hour TTL) for repeated searches
+- Filetype display (PDF, EPUB) in search results
+- Optional selection argument for automation
+- Fast Nokogiri-based HTML parsing
 
 Run locally: `ruby annas-archive-search/annas_search.rb 'search term' [number]`
-
-Displays formatted list (e.g., 1. "Title" by Author (Date)), selects number, prints `brave-browser --app 'url'` command.
-
-Run online: `./annas_archive_online.sh 'search term' [number]`
+Run online: `bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/annas_archive_online.sh) 'search term' [number]`
 
 ## PDF Search
 
-Scripts for searching and downloading PDFs from the web using Brave Search API or Selenium.
+Comprehensive PDF search and download tools with multiple search methods.
 
-- `pdf_search.rb`: Auto-download all PDF results (requires Brave API key)
-- `pdf_selector.rb`: Select which PDFs to download (requires Brave API key)
-- `brave_selenium_search.rb`: Selenium-based search without API key
+- **`pdf_search.rb`**: Auto-download all PDF results using Brave Search API
+- **`pdf_selector.rb`**: Interactive selection of PDFs to download (API-based)
+- **`brave_selenium_search.rb`**: Selenium-based search without API key requirement
+- **`content_sorter.rb`**: Organize downloaded PDFs by content analysis
 
-Run: `ruby pdf-search/pdf_search.rb 'term'` or `ruby pdf-search/pdf_selector.rb 'term'` (requires BRAVE_API_KEY), or `ruby pdf-search/brave_selenium_search.rb 'term'` (no key needed)
+Features:
+- API and Selenium-based search options
+- Batch download with progress tracking
+- Content-based file organization
+- Automatic duplicate detection
 
-## Brave Browser Script
+Run: `ruby pdf-search/pdf_search.rb 'term'` (API key required) or `ruby pdf-search/brave_selenium_search.rb 'term'` (no key needed)
 
-Modify Brave browser's Local State to enable experimental features.
+## Brave Browser Tools
 
-- `modify_local_state.rb`: Enable features and launch browser
+Browser automation and optimization tools for Brave browser.
 
-Run: `ruby brave-script/modify_local_state.rb`
+- **`modify_local_state.rb`**: Enable experimental features (Vulkan, GPU rasterization, etc.)
+- **`brave-modify.sh`**: Bash wrapper for the Ruby script
+
+Features:
+- Vulkan rendering with ANGLE
+- GPU rasterization and zero-copy uploads
+- Skia renderer for PDFs
+- Automatic backup creation
+- Safe modification with rollback option
+
+Run: `ruby brave-script/modify_local_state.rb` or `./brave-modify.sh`
 
 ## CachyOS Repository Management
 
-Scripts for managing CachyOS repositories.
+Advanced repository management with automatic CPU optimization detection.
 
-- `cachyos-repo.sh`: Main bash script to install/remove repos (auto-detects CPU)
-- `install-repo.awk`: AWK script to add standard CachyOS (x86-64-v3) repo
-- `install-v4-repo.awk`: AWK script to add x86-64-v4 optimized repo
-- `install-znver4-repo.awk`: AWK script to add Zen4 optimized repo
-- `remove-repo.awk`: AWK script to remove CachyOS repos
+- **`cachyos-repo.sh`**: Main bash script to install/remove repos (auto-detects CPU)
+- **`install-repo.awk`**: AWK script for standard CachyOS (x86-64-v3) repo
+- **`install-v4-repo.awk`**: AWK script for x86-64-v4 optimized repo
+- **`install-znver4-repo.awk`**: AWK script for Zen4 optimized repo
+- **`remove-repo.awk`**: AWK script to remove CachyOS repos
 
-Run: `sudo ./cachyos-repo/cachyos-repo.sh --install` (recommended) or `awk -f cachyos-repo/install-repo.awk /etc/pacman.conf`
+Features:
+- Automatic CPU ISA level detection
+- Keyring and mirrorlist installation
+- Safe backup and rollback
+- Multi-architecture support
+
+Run: `sudo ./cachyos-repo/cachyos-repo.sh --install` (recommended) or use individual AWK scripts
+
+## EPUB File Renamers
+
+High-performance tools to rename EPUB files using metadata extraction.
+
+### Go Implementation
+- **`go-epub-renamer/`**: Compiled binary with minimal memory usage
+- Single binary deployment, cross-platform support
+- Performance: <200ms per file, <10MB peak memory
+
+### Python Implementation  
+- **`python-epub-renamer/`**: Lightweight Python script using standard library
+- Cross-platform with curl-executable support
+- No external dependencies required
+
+Usage (Go): `./epub-renamer book.epub` or via curl installer
+Usage (Python): `python3 epub_renamer.py book.epub`
+
+Both formats: `title - author.epub` with dry-run support
+
+## Project Gutenberg Downloader
+
+Multi-language implementation for downloading books from Project Gutenberg.
+
+### Supported Languages
+- **Ruby**: `ruby download_books.rb`
+- **Python**: `python download_books.py` (requires requests)
+- **JavaScript**: `node download_books.js`
+- **TypeScript**: `ts-node download_books.ts`
+- **Rust**: `cargo run` 
+- **Java**: `javac DownloadBooks.java && java DownloadBooks`
+- **Zig**: `zig run download_books.zig`
+
+Features:
+- Parallel downloading for performance
+- Downloads books 1-100 as `book_{id}.txt`
+- Skips existing files automatically
+- Error handling for invalid IDs
+
+## Anna's Archive Desktop Application
+
+Cross-platform desktop application built with Tauri for searching Anna's Archive.
+
+- **Frontend**: HTML/CSS/JavaScript
+- **Backend**: Rust with Tauri framework
+- **Features**: Native desktop experience, fast search, integrated browser
+
+Installation: Build from source with `npm install && npm run tauri build`
+
+## Development Guidelines
+
+### Code Style
+- **Bash**: `set -e`, `snake_case()` functions, `local` variables
+- **Error Handling**: Clear exit codes (0 success, 1 error)
+- **Package Management**: Use `paru-bin` with `--needed --noconfirm` flags
+- **Testing**: Syntax check with `bash -n` for scripts, `ruby -c` for Ruby
+
+### Common Fixes
+- **Ruby `gets` Error**: Use `STDIN.gets` instead of `gets` for interactive input
+- **Web Scraping**: Update CSS selectors when site structure changes
+- **API Integration**: Handle rate limits and network failures gracefully

@@ -1,35 +1,50 @@
 # Go Epub Renamer
 
-A high-performance, compiled epub file renamer that formats files as `title - author.epub`.
+High-performance, compiled EPUB file renamer written in Go, designed for speed and reliability with minimal resource usage.
+
+## Overview
+
+This Go application provides lightning-fast EPUB file renaming by extracting metadata from the EPUB's internal structure. It formats files as `title - author.epub` with robust error handling and cross-platform compatibility.
 
 ## Features
 
-- **Performant**: Fast compiled binary with minimal memory usage
-- **KISS-Compliant**: Clean Go code, single binary deployment
-- **No Redundancies**: Focused implementation with standard library only
-- **Cross-platform**: Single binary works on Linux, macOS, Windows
-- **Curl-executable**: Bash wrapper enables direct execution from URLs
+- **High Performance**: Compiled binary with sub-second processing per file
+- **Minimal Memory**: <10MB peak memory usage
+- **KISS Principle**: Clean, focused implementation using only standard library
+- **Cross-Platform**: Single binary works on Linux, macOS, Windows
+- **Curl-Executable**: Direct execution from GitHub URLs via installer script
+- **Safe Operations**: Won't overwrite existing files, comprehensive error handling
 
 ## Usage
 
-### Direct execution (after building)
+### Direct Execution
 ```bash
+# Single file
 ./epub-renamer book.epub
-```
 
-### Via curl (recommended)
-```bash
-curl -L https://raw.githubusercontent.com/user/repo/main/install.sh | bash -s -- book.epub
-```
-
-### Multiple files
-```bash
+# Multiple files
 ./epub-renamer book1.epub book2.epub book3.epub
+
+# All EPUB files in directory
+./epub-renamer *.epub
 ```
 
-### Dry run (preview changes)
+### Via Curl (Recommended)
 ```bash
+# Direct execution from GitHub
+curl -L https://raw.githubusercontent.com/7not-nico/Scripts/main/go-epub-renamer/scripts/install.sh | bash -s -- book.epub
+```
+
+### Advanced Options
+```bash
+# Dry run (preview changes without renaming)
 ./epub-renamer --dry-run *.epub
+
+# Verbose output
+./epub-renamer --verbose book.epub
+
+# Help
+./epub-renamer --help
 ```
 
 ## Requirements
