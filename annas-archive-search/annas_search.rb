@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
 
 begin
-require 'nokogiri'
-require 'open-uri'
 require 'json'
 require 'fileutils'
 require 'digest'
@@ -16,6 +14,7 @@ end
 require_relative 'lib/config'
 require_relative 'lib/errors'
 require_relative 'lib/cache'
+require_relative 'lib/network'
 require_relative 'lib/parser'
 require_relative 'lib/display'
 require_relative 'lib/browser'
@@ -37,7 +36,7 @@ end
 
 search = ARGV[0]
 selection = ARGV[1]
-url = "#{Config::NETWORK[:base_url]}/search?q=#{URI.encode_www_form_component(search)}"
+url = Network.build_search_url(search, Config::NETWORK[:base_url])
 cache_file = Cache.get_file(search, Config::CACHE[:dir])
 
 # Try cache first
@@ -47,12 +46,12 @@ books = Cache.load(cache_file, Config::CACHE[:ttl])
 unless books
   begin
     puts "Searching Anna's Archive..."
-    doc = Nokogiri::HTML(URI.open(url, open_timeout: Config::NETWORK[:open_timeout], read_timeout: Config::NETWORK[:read_timeout]))
+    doc = Network.fetch_html(url, Config::NETWORK[:open_timeout], Config::NETWORK[:read_timeout])
     books = Parser.parse_books(doc, Config::PARSING[:result_selector], Config::PARSING[:author_selector], Config::PARSING[:date_regex], Config::PARSING[:filetype_regex], Config::NETWORK[:base_url])
     Cache.save(cache_file, books)
     puts "Found #{books.size} books"
    rescue => e
-     Errors.handle_network(e)
+    Errors.handle_network(e)
   end
 end
 
