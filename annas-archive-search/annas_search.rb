@@ -16,6 +16,7 @@ require_relative 'lib/errors'
 require_relative 'lib/cache'
 require_relative 'lib/network'
 require_relative 'lib/parser'
+require_relative 'lib/book_builder'
 require_relative 'lib/display'
 require_relative 'lib/browser'
 require_relative 'lib/input'
@@ -23,7 +24,7 @@ require_relative 'lib/input'
 Config.validate
 
 # Main execution
-Cache.cleanup(Config::CACHE[:dir], Config::CACHE[:ttl], Config::CACHE[:cleanup_probability])
+Cache.cleanup(Config.cache[:dir], Config.cache[:ttl], Config.cache[:cleanup_probability])
 if ARGV.empty?
   puts "Usage: ruby annas_search.rb 'search string' [selection]"
   puts "  selection: optional number(s) to open (comma-separated or 'all')"
@@ -36,18 +37,19 @@ end
 
 search = ARGV[0]
 selection = ARGV[1]
-url = Network.build_search_url(search, Config::NETWORK[:base_url])
-cache_file = Cache.get_file(search, Config::CACHE[:dir])
+url = Network.build_search_url(search, Config.network[:base_url])
+cache_file = Cache.get_file(search, Config.cache[:dir])
 
 # Try cache first
-books = Cache.load(cache_file, Config::CACHE[:ttl])
+books = Cache.load(cache_file, Config.cache[:ttl])
 
 # Fetch if no cache or expired
 unless books
   begin
     puts "Searching Anna's Archive..."
-    doc = Network.fetch_html(url, Config::NETWORK[:open_timeout], Config::NETWORK[:read_timeout])
-    books = Parser.parse_books(doc, Config::PARSING[:result_selector], Config::PARSING[:author_selector], Config::PARSING[:date_regex], Config::PARSING[:filetype_regex], Config::NETWORK[:base_url])
+    doc = Network.fetch_html(url, Config.network[:open_timeout], Config.network[:read_timeout])
+    raw_results = Parser.extract_raw_results(doc, Config.parsing[:result_selector])
+    books = BookBuilder.build_books(raw_results, Config.parsing[:author_selector], Config.parsing[:date_regex], Config.parsing[:filetype_regex], Config.network[:base_url])
     Cache.save(cache_file, books)
     puts "Found #{books.size} books"
    rescue => e
@@ -60,12 +62,12 @@ if books.empty?
   exit 0
 end
 
-Display.display_books(books, Config::DISPLAY[:title_max_len], Config::DISPLAY[:author_max_len])
+Display.display_books(books, Config.display[:title_max_len], Config.display[:author_max_len])
 
 # Handle selection
 input = Input.get(selection)
 exit 0 if input.empty?
 
 selections = Input.parse_selection(input, books.size)
-browser_cmd = Config::BROWSERS[:cmd] || Config::BROWSERS[:fallbacks].first
-selections.each { |i| Browser.open(books[i], Config::BROWSERS[:fallbacks], Config::DEBUG, Config::DISPLAY[:title_max_len]) } if selections.any?
+browser_cmd = Config.browsers[:cmd] || Config.browsers[:fallbacks].first
+selections.each { |i| Browser.open(books[i], Config.browsers[:fallbacks], Config.debug, Config.display[:title_max_len]) } if selections.any?
