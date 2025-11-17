@@ -13,27 +13,73 @@ rescue LoadError => e
 end
 
 # Configuration
-CACHE_DIR = File.expand_path('~/.cache/annas_search')
-CACHE_TTL = 3600  # 1 hour
-CACHE_CLEANUP_PROBABILITY = 0.1  # 10% chance to cleanup on each run
-TITLE_MAX_LEN = 50
-AUTHOR_MAX_LEN = 30
-OPEN_TIMEOUT = 10
-READ_TIMEOUT = 30
-BROWSER_FALLBACKS = ['brave --app', 'firefox --new-window', 'chromium --app']
-BROWSER_CMD = ENV['BROWSER_COMMAND'] || BROWSER_FALLBACKS.first
-BASE_URL = 'https://annas-archive.org'
-RESULT_SELECTOR = '.flex.pt-3.pb-3'
-AUTHOR_SELECTOR = 'a[href*="/search?q="]'
-DATE_REGEX = Regexp.new(/\b(19[0-9]{2}|20[0-2][0-9])\b/)
-FILETYPE_REGEX = Regexp.new(/ · ([A-Z]{3,4}) · /)
+module Config
+  CACHE = {
+    dir: File.expand_path('~/.cache/annas_search'),
+    ttl: 3600,  # 1 hour
+    cleanup_probability: 0.1  # 10% chance to cleanup on each run
+  }
+
+  DISPLAY = {
+    title_max_len: 50,
+    author_max_len: 30
+  }
+
+  NETWORK = {
+    open_timeout: 10,
+    read_timeout: 30,
+    base_url: 'https://annas-archive.org'
+  }
+
+  BROWSERS = {
+    fallbacks: ['brave --app', 'firefox --new-window', 'chromium --app'],
+    cmd: ENV['BROWSER_COMMAND']
+  }
+
+  PARSING = {
+    result_selector: '.flex.pt-3.pb-3',
+    author_selector: 'a[href*="/search?q="]',
+    date_regex: /\b(19[0-9]{2}|20[0-2][0-9])\b/,
+    filetype_regex: / · ([A-Z]{3,4}) · /
+  }
+end
+
+# Extract constants for backward compatibility
+CACHE_DIR = Config::CACHE[:dir]
+CACHE_TTL = Config::CACHE[:ttl]
+CACHE_CLEANUP_PROBABILITY = Config::CACHE[:cleanup_probability]
+TITLE_MAX_LEN = Config::DISPLAY[:title_max_len]
+AUTHOR_MAX_LEN = Config::DISPLAY[:author_max_len]
+OPEN_TIMEOUT = Config::NETWORK[:open_timeout]
+READ_TIMEOUT = Config::NETWORK[:read_timeout]
+BROWSER_FALLBACKS = Config::BROWSERS[:fallbacks]
+BROWSER_CMD = Config::BROWSERS[:cmd] || BROWSER_FALLBACKS.first
+BASE_URL = Config::NETWORK[:base_url]
+RESULT_SELECTOR = Config::PARSING[:result_selector]
+AUTHOR_SELECTOR = Config::PARSING[:author_selector]
+DATE_REGEX = Config::PARSING[:date_regex]
+FILETYPE_REGEX = Config::PARSING[:filetype_regex]
 
 # Validate configuration
-begin
-  FileUtils.mkdir_p(CACHE_DIR)
-rescue => e
-  handle_error("Failed to create cache directory: #{e.message}")
+def validate_config
+  begin
+    FileUtils.mkdir_p(CACHE_DIR)
+  rescue => e
+    handle_error("Failed to create cache directory #{CACHE_DIR}: #{e.message}")
+  end
+
+  # Validate timeouts are reasonable
+  handle_error("Invalid timeout values") if OPEN_TIMEOUT <= 0 || READ_TIMEOUT <= 0
+
+  # Validate cache settings
+  handle_error("Invalid cache TTL") if CACHE_TTL <= 0
+  handle_error("Invalid cleanup probability") unless (0..1).include?(CACHE_CLEANUP_PROBABILITY)
+
+  # Validate display lengths
+  handle_error("Invalid display lengths") if TITLE_MAX_LEN <= 0 || AUTHOR_MAX_LEN <= 0
 end
+
+validate_config
 
 def truncate(str, len)
   str.length > len ? "#{str[0...len]}..." : str
@@ -93,8 +139,7 @@ def open_browser(book)
   return unless book[:url]
   BROWSER_FALLBACKS.each do |browser|
     next unless browser_available?(browser)
-    cmd = "#{browser} '#{book[:url]}'"
-    success = system(cmd)
+    success = system(browser, book[:url])
     if success
       puts "Opened: #{truncate_title(book[:title])}"
       return
@@ -123,8 +168,11 @@ end
 
 def cleanup_cache(probability = CACHE_CLEANUP_PROBABILITY)
   return unless rand < probability
-  Dir.glob("#{CACHE_DIR}/*.json").each do |file|
-    File.delete(file) if (Time.now - File.mtime(file)) >= CACHE_TTL
+  now = Time.now
+  Dir.each_child(CACHE_DIR) do |file|
+    next unless file.end_with?('.json')
+    filepath = File.join(CACHE_DIR, file)
+    File.delete(filepath) if (now - File.mtime(filepath)) >= CACHE_TTL
   end
 end
 
@@ -139,8 +187,22 @@ def handle_error(message, exit_code = 1)
   exit exit_code
 end
 
+def handle_network_error(error)
+  case error
+  when OpenURI::HTTPError
+    handle_error("HTTP #{error.message} - site may be down or blocking requests")
+  when SocketError
+    handle_error("Network connection failed - check your internet connection and try again")
+  else
+    handle_error("Failed to fetch results - #{error.message} (try again later)")
+  end
+end
+
 def browser_available?(browser_cmd)
-  system("#{browser_cmd} --version >/dev/null 2>&1")
+  return true if AVAILABLE_BROWSERS.include?(browser_cmd)
+  available = system("#{browser_cmd.split.first} --version >/dev/null 2>&1")
+  AVAILABLE_BROWSERS << browser_cmd if available
+  available
 end
 
 # Main execution
@@ -171,12 +233,8 @@ unless books
     books = parse_books(doc)
     save_cache(cache_file, books)
     puts "Found #{books.size} books"
-   rescue OpenURI::HTTPError => e
-     handle_error("HTTP #{e.message}")
-   rescue SocketError => e
-     handle_error("Network connection failed")
    rescue => e
-     handle_error("Failed to fetch results - #{e.message}")
+     handle_network_error(e)
   end
 end
 
