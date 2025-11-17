@@ -54,6 +54,11 @@ Select numbers to open books in Brave browser webapp mode automatically.
 
 ## Technical Implementation
 
+### Modular Architecture
+- **Separation of Concerns**: Code organized into focused classes (`Config`, `Cache`, `Parser`, `Display`, `Browser`, `Input`, `Errors`) in `lib/` directory
+- **Clean Code**: Encapsulated methods, parameter passing instead of globals, reduced redundancies
+- **KISS Principle**: Simple class methods, minimal dependencies, straightforward logic
+
 ### Caching System
 - **Storage**: JSON-based cache files in query-specific format
 - **TTL**: 1-hour expiration for fresh results
@@ -62,8 +67,7 @@ Select numbers to open books in Brave browser webapp mode automatically.
 ### Parsing Strategy
 - **CSS Selectors**: Optimized selectors for current Anna's Archive structure
   - Results: `.flex.pt-3.pb-3`
-  - Titles/Links: `h3 a`
-  - Torrent links: `/dyn/small_file/torrents/`
+  - Authors: `a[href*="/search?q="]`
 - **Robust Extraction**: Fallback mechanisms for missing elements
 - **Error Handling**: Comprehensive error recovery for network issues
 
