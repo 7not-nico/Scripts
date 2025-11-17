@@ -37,6 +37,8 @@ module Config
     available: []
   }
 
+  DEBUG = ENV['DEBUG'] == '1'
+
   PARSING = {
     result_selector: '.flex.pt-3.pb-3',
     author_selector: 'a[href*="/search?q="]',
@@ -57,6 +59,7 @@ BROWSER_FALLBACKS = Config::BROWSERS[:fallbacks]
 BROWSER_CMD = Config::BROWSERS[:cmd] || BROWSER_FALLBACKS.first
 AVAILABLE_BROWSERS = Config::BROWSERS[:available]
 BASE_URL = Config::NETWORK[:base_url]
+DEBUG = Config::DEBUG
 RESULT_SELECTOR = Config::PARSING[:result_selector]
 AUTHOR_SELECTOR = Config::PARSING[:author_selector]
 DATE_REGEX = Config::PARSING[:date_regex]
@@ -141,7 +144,11 @@ def open_browser(book)
   return unless book[:url]
   BROWSER_FALLBACKS.each do |browser|
     next unless browser_available?(browser)
-    success = system(browser, book[:url])
+    # Parse browser command into array and append URL
+    cmd_parts = browser.split + [book[:url]]
+    puts "DEBUG: Trying browser command: #{cmd_parts.join(' ')}" if DEBUG
+    success = system(*cmd_parts)
+    puts "DEBUG: Browser command success: #{success}" if DEBUG
     if success
       puts "Opened: #{truncate_title(book[:title])}"
       return
@@ -202,7 +209,10 @@ end
 
 def browser_available?(browser_cmd)
   return true if AVAILABLE_BROWSERS.include?(browser_cmd)
-  available = system("#{browser_cmd.split.first} --version >/dev/null 2>&1")
+  # Use 'which' to check if browser executable exists
+  browser_exe = browser_cmd.split.first
+  available = system("which #{browser_exe} >/dev/null 2>&1")
+  puts "DEBUG: Browser '#{browser_cmd}' available: #{available}" if DEBUG
   AVAILABLE_BROWSERS << browser_cmd if available
   available
 end
