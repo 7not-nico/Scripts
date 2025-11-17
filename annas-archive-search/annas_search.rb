@@ -6,6 +6,7 @@ require 'open-uri'
 require 'json'
 require 'fileutils'
 require 'digest'
+require 'colorize'
 rescue LoadError => e
   puts "Missing required gem: #{e.message}"
   puts "Install with: gem install nokogiri"
