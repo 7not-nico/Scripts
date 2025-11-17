@@ -7,7 +7,9 @@ class Config
       {
         dir: File.expand_path('~/.cache/annas_search'),
         ttl: 3600,  # 1 hour
-        cleanup_probability: 0.1  # 10% chance to cleanup on each run
+        cleanup_probability: 0.1,  # 10% chance to cleanup on each run
+        max_size_mb: 50,  # Maximum cache size in MB
+        max_files: 1000   # Maximum number of cache files
       }
     end
 

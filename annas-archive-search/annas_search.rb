@@ -37,11 +37,29 @@ end
 
 search = ARGV[0]
 selection = ARGV[1]
+
+# Validate search query
+unless Input.validate_search_query(search)
+  puts "Error: Invalid search query"
+  puts "Query must be 1-200 characters and not contain special characters like < > ; & | ` $ ( ) { } [ ]"
+  exit 1
+end
+
 url = Network.build_search_url(search, Config.network[:base_url])
 cache_file = Cache.get_file(search, Config.cache[:dir])
 
 # Try cache first
-books = Cache.load(cache_file, Config.cache[:ttl])
+begin
+  books = Cache.load(cache_file, Config.cache[:ttl])
+rescue => e
+  if Errors.handle_cache(e, "load")
+    # Clear corrupted cache
+    File.delete(cache_file) if File.exist?(cache_file)
+    books = nil
+  else
+    books = nil
+  end
+end
 
 # Fetch if no cache or expired
 unless books
@@ -50,7 +68,11 @@ unless books
     doc = Network.fetch_html(url, Config.network[:open_timeout], Config.network[:read_timeout])
     raw_results = Parser.extract_raw_results(doc, Config.parsing[:result_selector])
     books = BookBuilder.build_books(raw_results, Config.parsing[:author_selector], Config.parsing[:date_regex], Config.parsing[:filetype_regex], Config.network[:base_url])
-    Cache.save(cache_file, books)
+    begin
+      Cache.save(cache_file, books)
+    rescue => e
+      Errors.handle_cache(e, "save")
+    end
     puts "Found #{books.size} books"
    rescue => e
     Errors.handle_network(e)
