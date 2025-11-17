@@ -13,7 +13,7 @@ class Parser
     date_match = text.match(date_regex)
     filetype_match = text.match(filetype_regex)
 
-    book_link = result.at_css('a')
+    book_link = result.at_css('a.js-vim-focus')
     url = book_link ? "#{base_url}#{book_link['href']}" : nil
 
     {
