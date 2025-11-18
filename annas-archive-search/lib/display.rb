@@ -18,13 +18,14 @@ class Display
 
   def self.display_books(books, title_max, author_max)
     puts "Found books:".bold
-    books.each do |book|
+    books.each_with_index do |book, display_index|
       date = book[:date] || "Unknown Date"
       prefix = book[:filetype] ? "[#{filetype_color(book[:filetype])}] " : ""
       title = truncate(book[:title], title_max).bold
       author = truncate(book[:author], author_max).cyan
       date_colored = date.gray
-      puts "#{prefix}#{book[:index]}. \"#{title}\" by #{author} (#{date_colored})"
+      display_number = display_index + 1
+      puts "#{prefix}#{display_number}. \"#{title}\" by #{author} (#{date_colored})"
     end
   end
 end

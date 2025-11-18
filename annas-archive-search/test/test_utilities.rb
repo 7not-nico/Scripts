@@ -129,7 +129,7 @@ class TestInput < Minitest::Test
   def test_parse_selection_by_position_all
     books = (1..5).map { |i| { index: i, title: "Book #{i}" } }
     result = Input.parse_selection_by_position("all", books)
-    assert_equal books, result
+    assert_equal [0, 1, 2, 3, 4], result
   end
 
   def test_parse_selection_by_position_out_of_range
