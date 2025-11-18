@@ -35,6 +35,11 @@ awk -f cachyos-repo/install-repo.awk /etc/pacman.conf
 - Verify online execution with curl/bash pipes
 - Test package installation workflows
 
+## Performance Optimization
+- **Bundled Scripts**: For online execution, create bundled versions with all libraries inline to reduce download overhead from multiple files to single file
+- **Ultra-minimal Online**: Prefer single-file downloads over multi-file approaches for faster startup times
+- **Cache Strategy**: Implement file-based caching with appropriate TTL for repeated operations
+
 ## Common Errors and Fixes
 - **Ruby `gets` Error**: When `gets` fails with "No such file or directory" on arguments, change `gets` to `STDIN.gets` to read from stdin instead of ARGF (which treats args as files).
 - **Selector Outdated**: For web scraping, re-inspect site HTML and update CSS selectors if site changes (e.g., Anna's Archive torrent links).

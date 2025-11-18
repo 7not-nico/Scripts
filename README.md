@@ -103,7 +103,7 @@ sudo ./cachyos-repo/cachyos-repo.sh --install
 Ultra-fast web scraping scripts for searching books on Anna's Archive with minimal overhead.
 
 - **`annas_search.rb`**: Search with cached results, filetype display, and automated browser launching
-- **`annas_search_bundled.rb`**: Self-contained version with all libraries inline
+- **`annas_search_bundled.rb`**: Self-contained version with all libraries inline (no dependencies)
 - **`annas_archive_online.sh`**: Ultra-minimal online runner (downloads single file for ~1-2s startup)
 
 Features:
@@ -115,6 +115,10 @@ Features:
 
 Run locally: `ruby annas-archive-search/annas_search.rb 'search term' [number]`
 Run online: `bash <(curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/annas_archive_online.sh) 'search term' [number]`
+
+### Bundled Script Architecture
+
+The `annas_search_bundled.rb` demonstrates an ultra-minimal approach where all library code is inlined into a single file, eliminating require_relative dependencies and reducing download overhead from multiple files to one. This pattern can be applied to other multi-file scripts for improved performance.
 
 ## PDF Search
 
@@ -222,6 +226,12 @@ Installation: Build from source with `npm install && npm run tauri build`
 - **Error Handling**: Clear exit codes (0 success, 1 error)
 - **Package Management**: Use `paru-bin` with `--needed --noconfirm` flags
 - **Testing**: Syntax check with `bash -n` for scripts, `ruby -c` for Ruby
+
+### Performance Optimization
+- **Bundled Scripts**: For multi-file Ruby scripts, consider creating bundled versions with inline libraries to reduce download overhead
+- **Single File Downloads**: Prefer single-file solutions over multiple file downloads for online execution
+- **Minimal Dependencies**: Reduce external dependencies and inline critical code when possible
+- **Cache Effectively**: Implement appropriate caching strategies for repeated operations
 
 ### Common Fixes
 - **Ruby `gets` Error**: Use `STDIN.gets` instead of `gets` for interactive input
