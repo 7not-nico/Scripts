@@ -12,19 +12,25 @@ fi
 search_term="$1"
 selection="$2"
 
-# Download to temp file
-temp_script=$(mktemp)
-curl -s https://raw.githubusercontent.com/7not-nico/Scripts/main/annas-archive-search/annas_search.rb > "$temp_script"
+# Download and extract the entire directory
+temp_dir=$(mktemp -d)
+if ! curl -sL https://github.com/7not-nico/Scripts/archive/main.tar.gz | tar -xz -C "$temp_dir" --strip-components=1 "Scripts-main/annas-archive-search/"; then
+  echo "Error: Failed to download and extract script from GitHub. Check network or URL."
+  rm -rf "$temp_dir"
+  exit 1
+fi
 
-# Check if download succeeded
-if [ ! -s "$temp_script" ]; then
-  echo "Error: Failed to download script from GitHub. Check network or URL."
-  rm "$temp_script"
+# Check if extraction succeeded
+if [ ! -f "$temp_dir/annas-archive-search/annas_search.rb" ]; then
+  echo "Error: Script extraction failed - annas_search.rb not found."
+  rm -rf "$temp_dir"
   exit 1
 fi
 
 # Run with ruby
-ruby "$temp_script" "$search_term" "$selection"
+cd "$temp_dir/annas-archive-search"
+ruby annas_search.rb "$search_term" "$selection"
 
 # Clean up
-rm "$temp_script"
+cd - > /dev/null
+rm -rf "$temp_dir"
