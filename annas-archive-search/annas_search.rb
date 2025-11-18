@@ -90,6 +90,6 @@ Display.display_books(books, Config.display[:title_max_len], Config.display[:aut
 input = Input.get(selection)
 exit 0 if input.empty?
 
-selections = Input.parse_selection(input, books.size)
+selections = Input.parse_selection_by_position(input, books)
 browser_cmd = Config.browsers[:cmd] || Config.browsers[:fallbacks].first
 selections.each { |i| Browser.open(books[i], Config.browsers[:fallbacks], Config.debug, Config.display[:title_max_len]) } if selections.any?

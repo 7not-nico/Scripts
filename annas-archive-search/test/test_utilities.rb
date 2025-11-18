@@ -113,6 +113,30 @@ class TestInput < Minitest::Test
     result = Input.parse_selection("10,15", 5)
     assert_equal [], result
   end
+
+  def test_parse_selection_by_position_basic
+    books = (1..5).map { |i| { index: i, title: "Book #{i}" } }
+    result = Input.parse_selection_by_position("3", books)
+    assert_equal [2], result
+  end
+
+  def test_parse_selection_by_position_multiple
+    books = (1..5).map { |i| { index: i, title: "Book #{i}" } }
+    result = Input.parse_selection_by_position("1,3,5", books)
+    assert_equal [0, 2, 4], result
+  end
+
+  def test_parse_selection_by_position_all
+    books = (1..5).map { |i| { index: i, title: "Book #{i}" } }
+    result = Input.parse_selection_by_position("all", books)
+    assert_equal books, result
+  end
+
+  def test_parse_selection_by_position_out_of_range
+    books = (1..3).map { |i| { index: i, title: "Book #{i}" } }
+    result = Input.parse_selection_by_position("1,5,10", books)
+    assert_equal [0], result
+  end
 end
 
 class TestNetwork < Minitest::Test

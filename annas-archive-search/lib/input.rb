@@ -24,6 +24,23 @@ class Input
     input.split(',').map { |n| n.strip.to_i - 1 }.select { |n| n.between?(0, count - 1) }
   end
 
+  def self.parse_selection_by_position(input, books)
+    return books if input.downcase == 'all'
+    
+    user_selections = input.split(',').map { |n| n.strip.to_i }
+    result = []
+    
+    user_selections.each do |pos|
+      # Convert 1-based position to 0-based array index
+      array_index = pos - 1
+      if array_index.between?(0, books.size - 1)
+        result << array_index
+      end
+    end
+    
+    result
+  end
+
   def self.get(selection)
     return selection if selection
     puts "Enter numbers (comma-separated or 'all'):"
