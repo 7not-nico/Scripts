@@ -12,23 +12,39 @@ fi
 search_term="$1"
 selection="$2"
 
-# Download and extract the entire directory
+# Create temp directory structure
 temp_dir=$(mktemp -d)
-if ! curl -sL https://github.com/7not-nico/Scripts/archive/main.tar.gz | tar -xz -C "$temp_dir" --strip-components=1 "Scripts-main/annas-archive-search/"; then
-  echo "Error: Failed to download and extract script from GitHub. Check network or URL."
+mkdir -p "$temp_dir/lib"
+
+# Download main script and all required library files
+base_url="https://raw.githubusercontent.com/7not-nico/Scripts/main/annas-archive-search"
+
+# Download main script
+if ! curl -s "$base_url/annas_search.rb" -o "$temp_dir/annas_search.rb"; then
+  echo "Error: Failed to download main script from GitHub."
   rm -rf "$temp_dir"
   exit 1
 fi
 
-# Check if extraction succeeded
-if [ ! -f "$temp_dir/annas-archive-search/annas_search.rb" ]; then
-  echo "Error: Script extraction failed - annas_search.rb not found."
+# Download library files
+lib_files="config.rb errors.rb cache.rb network.rb parser.rb book_builder.rb display.rb browser.rb input.rb"
+for lib_file in $lib_files; do
+  if ! curl -s "$base_url/lib/$lib_file" -o "$temp_dir/lib/$lib_file"; then
+    echo "Error: Failed to download lib/$lib_file from GitHub."
+    rm -rf "$temp_dir"
+    exit 1
+  fi
+done
+
+# Verify downloads
+if [ ! -f "$temp_dir/annas_search.rb" ]; then
+  echo "Error: Main script download failed."
   rm -rf "$temp_dir"
   exit 1
 fi
 
 # Run with ruby
-cd "$temp_dir/annas-archive-search"
+cd "$temp_dir"
 ruby annas_search.rb "$search_term" "$selection"
 
 # Clean up
