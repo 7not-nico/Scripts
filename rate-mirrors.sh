@@ -5,43 +5,65 @@
 
 set -e
 
-GREEN='\033[0;32m'
-NC='\033[0m'
-
 print_status() {
-    echo -e "${GREEN}[INFO]${NC} $1"
+    echo "󰍉 $1"
 }
 
-check_rate_mirrors_run() {
-    local marker_file="/tmp/cachyos_rate_mirrors_run"
-    
-    if [ -f "$marker_file" ] && [ $(find "$marker_file" -mtime -7 2>/dev/null) ]; then
-        print_status "cachyos-rate-mirrors already run recently (within 7 days)"
-        return 0
-    fi
-    
-    return 1
+ask_user_rate_mirrors() {
+    while true; do
+        read -p " Run cachyos-rate-mirrors to optimize package download speeds? (y/n): " yn
+        case $yn in
+            [Yy]* ) return 0;;
+            [Nn]* ) return 1;;
+            * ) echo "Please answer y or n.";;
+        esac
+    done
+}
+
+ask_user_hardware_detection() {
+    while true; do
+        read -p " Run hardware detection with chwd to configure drivers? (y/n): " yn
+        case $yn in
+            [Yy]* ) return 0;;
+            [Nn]* ) return 1;;
+            * ) echo "Please answer y or n.";;
+        esac
+    done
 }
 
 main() {
-    if check_rate_mirrors_run; then
-        print_status "Skipping mirror rating - already done recently"
-    else
+    print_status "Installing paru first..."
+    sudo pacman -S --needed --noconfirm paru-bin
+    
+    print_status "Installing cachyos-hello and cachyos-kernel-manager first..."
+    paru -S --needed --noconfirm cachyos-hello cachyos-kernel-manager
+    
+    if ask_user_rate_mirrors; then
         print_status "Installing cachyos-rate-mirrors..."
-        sudo pacman -S --needed --noconfirm cachyos-rate-mirrors paru-bin
+        sudo pacman -S --needed --noconfirm cachyos-rate-mirrors
         
         print_status "Running cachyos-rate-mirrors..."
         sudo cachyos-rate-mirrors
         
-        touch "/tmp/cachyos_rate_mirrors_run"
-        print_status "Mirror rating complete!"
+        print_status " Mirror rating complete!"
+    else
+        print_status "Skipping mirror rating"
     fi
     
-    print_status "Installing fish, octopi, dropbox, brave-bin, zen-browser-bin, opencode-bin, gemini-cli, lapce, zed, cachyos-hello and chwd with paru..."
-    paru -S --needed --noconfirm fish 7zip octopi dropbox brave-bin zen-browser-bin opencode-bin gemini-cli lapce zed cachyos-hello chwd libappindicator cachyos-kernel-manager yazi python go zig ocaml ruby nodejs rust dotnet-sdk-bin 
+    if ask_user_hardware_detection; then
+        print_status "Installing chwd..."
+        paru -S --needed --noconfirm chwd
+        
+        print_status "Running hardware detection with chwd..."
+        sudo chwd -a || true
+        
+        print_status " Hardware detection complete!"
+    else
+        print_status "Skipping hardware detection"
+    fi
     
-    print_status "Running hardware detection with chwd..."
-    sudo chwd -a || true
+    print_status "Installing fish, octopi, dropbox, brave-bin, zen-browser-bin, opencode, gemini-cli, lapce, zed, bun and development tools with paru..."
+    paru -S --needed --noconfirm fish 7zip octopi dropbox brave-bin zen-browser-bin opencode gemini-cli lapce zed yazi python go zig ocaml ruby nodejs rust dotnet-sdk-bin bun-bin
     
     print_status "Launching cachyos-hello..."
     cachyos-hello
