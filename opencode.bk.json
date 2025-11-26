@@ -58,6 +58,32 @@
         "E2B_API_KEY": "{env:E2B_API_KEY}"
       },
       "enabled": false
+    },
+    "git": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "mcp-server-git"
+      ],
+      "enabled": true
+    },
+    "git-ingest": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/adhikasp/mcp-git-ingest",
+        "mcp-git-ingest"
+      ],
+      "environment": {
+        "GITHUB_TOKEN": "{env:GITHUB_TOKEN}"
+      },
+      "enabled": true
+    },
+    "github": {
+      "type": "remote",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "enabled": true
     }
   },
   "tools": {
@@ -68,7 +94,10 @@
     "exa": true,
     "deepwiki": true,
     "sequential-thinking": true,
-    "e2b": true
+    "e2b": true,
+    "git": true,
+    "git-ingest": true,
+    "github": true
   },
   "agent": {
     "plan": {
@@ -79,7 +108,10 @@
         "exa": true,
         "deepwiki": true,
         "sequential-thinking": true,
-        "e2b": true
+        "e2b": true,
+        "git": true,
+        "git-ingest": true,
+        "github": true
       }
     },
     "build": {
@@ -90,7 +122,10 @@
         "exa": true,
         "deepwiki": true,
         "sequential-thinking": true,
-        "e2b": true
+        "e2b": true,
+        "git": true,
+        "git-ingest": true,
+        "github": true
       }
     }
   }

@@ -62,8 +62,14 @@ main() {
         print_status "Skipping hardware detection"
     fi
     
-    print_status "Installing fish, octopi, dropbox, brave-bin, zen-browser-bin, opencode, gemini-cli, lapce, zed, bun and development tools with paru..."
-    paru -S --needed --noconfirm fish 7zip octopi dropbox brave-bin zen-browser-bin opencode gemini-cli lapce zed yazi python go zig ocaml ruby nodejs rust dotnet-sdk-bin bun-bin
+    print_status "Installing system utilities, browsers, editors, and development tools with paru..."
+    paru -S --needed --noconfirm \
+        fish 7zip octopi dropbox \
+        brave-bin zen-browser-bin \
+        opencode gemini-cli lapce zed \
+        yazi \
+        python go zig ocaml ruby nodejs rust \
+        bun-bin uv
     
     print_status "Launching cachyos-hello..."
     cachyos-hello
