@@ -68,7 +68,7 @@ main() {
         brave-bin zen-browser-bin \
         opencode gemini-cli lapce zed \
         yazi \
-        python go zig ocaml ruby nodejs rust \
+        python go zig ocaml ruby nodejs rust love \
         bun-bin uv
     
     print_status "Launching cachyos-hello..."
